@@ -66,6 +66,23 @@ export const systemSettings = sqliteTable('system_settings', {
     updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
+
+export const people = sqliteTable('people', {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    nameJa: text('name_ja'),
+    nameKana: text('name_kana'),
+    nameEn: text('name_en'),
+    role: text('role'),
+    party: text('party'),
+    imageUrl: text('image_url'),
+    description: text('description'),
+    wikipediaId: text('wikipedia_id'),
+    lastSyncedAt: integer('last_synced_at', { mode: 'timestamp' }),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+});
+
 export const eventsRelations = relations(events, ({ many }) => ({
     articles: many(articles),
 }));

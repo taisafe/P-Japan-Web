@@ -81,31 +81,16 @@ export function AppSidebar() {
                     <SidebarGroupLabel className="px-6 group-data-[collapsible=icon]:hidden">Navigation</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {items.map((item) => {
-                                if (item.url === '/manual-entry') {
-                                    return (
-                                        <SidebarMenuItem key={item.title}>
-                                            <SidebarMenuButton
-                                                tooltip={item.title}
-                                                onClick={handleManualUpdate}
-                                            >
-                                                <item.icon />
-                                                <span className="font-medium">{item.title}</span>
-                                            </SidebarMenuButton>
-                                        </SidebarMenuItem>
-                                    );
-                                }
-                                return (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton asChild tooltip={item.title}>
-                                            <a href={item.url} className="px-6 py-6 h-auto">
-                                                <item.icon className="scale-110" />
-                                                <span className="font-medium">{item.title}</span>
-                                            </a>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                );
-                            })}
+                            {items.map((item) => (
+                                <SidebarMenuItem key={item.title}>
+                                    <SidebarMenuButton asChild tooltip={item.title}>
+                                        <a href={item.url} className="px-6 py-6 h-auto">
+                                            <item.icon className="scale-110" />
+                                            <span className="font-medium">{item.title}</span>
+                                        </a>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>

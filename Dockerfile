@@ -1,5 +1,7 @@
 # Install dependencies only when needed
 FROM node:20-alpine AS deps
+# Install libc6-compat if needed, but for now just basic deps
+
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -24,6 +26,9 @@ WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
+# Install supervisor for process management
+RUN apk add --no-cache supervisor
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
@@ -33,6 +38,10 @@ COPY --from=builder /app/public ./public
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Copy worker script and supervisord config
+COPY --chown=nextjs:nodejs scripts/cron-worker.js ./scripts/cron-worker.js
+COPY --chown=nextjs:nodejs supervisord.conf /etc/supervisord.conf
 
 # Create data directory for SQLite
 RUN mkdir -p /data && chown nextjs:nodejs /data
@@ -46,4 +55,4 @@ ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 ENV DATABASE_URL "/data/japan-politics.db"
 
-CMD ["node", "server.js"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

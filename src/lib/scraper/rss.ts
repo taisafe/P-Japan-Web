@@ -5,6 +5,7 @@ import { eq, and, ne } from 'drizzle-orm';
 import { extractFromUrl } from './extractor';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/lib/logger';
+import { processArticle } from '@/lib/services/event-manager';
 
 const parser = new Parser();
 
@@ -48,18 +49,37 @@ export async function fetchAllRssSources(runId?: string) {
                     }
 
                     // Insert
-                    await db.insert(articles).values({
+                    // Insert
+                    const newArticle = {
                         id: uuidv4(),
                         sourceId: source.id,
                         title: item.title || 'Untitled',
                         url: item.link,
                         publishedAt: item.pubDate ? new Date(item.pubDate) : new Date(),
                         content: content,
+                        contentCN: null,
+                        rawHtml: null,
                         author: details.author || item.creator || item.author,
                         description: details.excerpt || item.contentSnippet,
                         heatScore: 0, // Initial score
+                        eventId: null,
+                        matchConfidence: null,
+                        matchStatus: null,
+                        isPaywalled: false,
                         createdAt: new Date(),
-                    });
+                    };
+
+                    await db.insert(articles).values(newArticle);
+
+                    // Trigger Event Processing
+                    try {
+                        // Cast to ArticleSelect (might need slight adjustment if types don't match exactly, but based on schema it should be close)
+                        // Actually processArticle expects ArticleSelect which comes from valid DB read or matching shape.
+                        // The shape matches schema.
+                        await processArticle(newArticle as any);
+                    } catch (pError) {
+                        console.error(`Event processing failed for article ${newArticle.id}:`, pError);
+                    }
 
                     totalNew++;
                 }
