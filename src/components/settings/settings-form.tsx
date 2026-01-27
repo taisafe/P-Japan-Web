@@ -4,7 +4,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, Save, Eye, EyeOff } from "lucide-react";
+import { Loader2, Save, Languages, FileText, Binary } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,14 +15,32 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import { SETTING_DEFAULTS } from "@/lib/services/settings";
+import { SETTING_DEFAULTS, AI_PROVIDERS } from "@/lib/constants/settings";
+import { AIFunctionCard } from "./ai-function-card";
+
+// 提供商驗證
+const providerEnum = z.enum(['openai', 'volcengine', 'custom']);
 
 const settingsSchema = z.object({
-    // AI 與翻譯設定
-    "ai.openai_api_key": z.string(),
-    "ai.openai_model": z.string(),
-    "ai.translation_enabled": z.boolean(),
-    "ai.translation_target_lang": z.string(),
+    // 翻譯功能
+    "ai.translation.provider": providerEnum,
+    "ai.translation.api_key": z.string(),
+    "ai.translation.base_url": z.string(),
+    "ai.translation.model": z.string(),
+    "ai.translation.enabled": z.boolean(),
+    "ai.translation.target_lang": z.string(),
+
+    // 簡報功能
+    "ai.briefing.provider": providerEnum,
+    "ai.briefing.api_key": z.string(),
+    "ai.briefing.base_url": z.string(),
+    "ai.briefing.model": z.string(),
+
+    // 向量嵌入功能
+    "ai.embedding.provider": providerEnum,
+    "ai.embedding.api_key": z.string(),
+    "ai.embedding.base_url": z.string(),
+    "ai.embedding.model": z.string(),
 
     // 內容抓取設定
     "fetch.rss_interval_minutes": z.number().min(5).max(1440),
@@ -46,11 +64,10 @@ interface SettingsFormProps {
 
 export function SettingsForm({ initialValues, onSave }: SettingsFormProps) {
     const [isLoading, setIsLoading] = React.useState(false);
-    const [showApiKey, setShowApiKey] = React.useState(false);
 
     const form = useForm<SettingsFormValues>({
         resolver: zodResolver(settingsSchema),
-        defaultValues: initialValues,
+        defaultValues: initialValues as SettingsFormValues,
     });
 
     const handleSubmit = async (values: SettingsFormValues) => {
@@ -67,90 +84,34 @@ export function SettingsForm({ initialValues, onSave }: SettingsFormProps) {
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                 <Tabs defaultValue="ai" className="w-full">
                     <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="ai">AI 與翻譯</TabsTrigger>
+                        <TabsTrigger value="ai">AI 模型</TabsTrigger>
                         <TabsTrigger value="fetch">內容抓取</TabsTrigger>
                         <TabsTrigger value="algorithm">邏輯演算法</TabsTrigger>
                     </TabsList>
 
-                    {/* AI 與翻譯標籤頁 */}
+                    {/* AI 模型標籤頁 */}
                     <TabsContent value="ai" className="space-y-4 mt-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>OpenAI 設定</CardTitle>
-                                <CardDescription>
-                                    設定 OpenAI API 金鑰和模型，用於事件匹配和翻譯功能。
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <FormField
-                                    control={form.control}
-                                    name="ai.openai_api_key"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>API 金鑰</FormLabel>
-                                            <FormControl>
-                                                <div className="relative">
-                                                    <Input
-                                                        type={showApiKey ? "text" : "password"}
-                                                        placeholder="sk-..."
-                                                        {...field}
-                                                    />
-                                                    <Button
-                                                        type="button"
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                                                        onClick={() => setShowApiKey(!showApiKey)}
-                                                    >
-                                                        {showApiKey ? (
-                                                            <EyeOff className="h-4 w-4" />
-                                                        ) : (
-                                                            <Eye className="h-4 w-4" />
-                                                        )}
-                                                    </Button>
-                                                </div>
-                                            </FormControl>
-                                            <FormDescription>
-                                                您的 OpenAI API 金鑰將安全地存儲在本地資料庫中。
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                        {/* 翻譯功能卡片 */}
+                        <AIFunctionCard
+                            title="翻譯功能"
+                            description="將日文和英文新聞翻譯為目標語言，建議使用較便宜的模型。"
+                            icon={Languages}
+                            fieldPrefix="ai.translation"
+                            form={form}
+                        />
 
-                                <FormField
-                                    control={form.control}
-                                    name="ai.openai_model"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>模型名稱</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="例如：gpt-4o、gpt-4o-mini、claude-3-opus..."
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormDescription>
-                                                輸入您要使用的 AI 模型名稱。
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </CardContent>
-                        </Card>
-
+                        {/* 翻譯額外設定 */}
                         <Card>
                             <CardHeader>
                                 <CardTitle>翻譯設定</CardTitle>
                                 <CardDescription>
-                                    配置自動翻譯功能。
+                                    配置自動翻譯功能的行為。
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <FormField
                                     control={form.control}
-                                    name="ai.translation_enabled"
+                                    name="ai.translation.enabled"
                                     render={({ field }) => (
                                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                                             <div className="space-y-0.5">
@@ -171,11 +132,11 @@ export function SettingsForm({ initialValues, onSave }: SettingsFormProps) {
 
                                 <FormField
                                     control={form.control}
-                                    name="ai.translation_target_lang"
+                                    name="ai.translation.target_lang"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>目標語言</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <Select onValueChange={field.onChange} value={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="選擇語言" />
@@ -193,6 +154,24 @@ export function SettingsForm({ initialValues, onSave }: SettingsFormProps) {
                                 />
                             </CardContent>
                         </Card>
+
+                        {/* 簡報功能卡片 */}
+                        <AIFunctionCard
+                            title="簡報功能"
+                            description="生成每日簡報摘要，建議使用能力較強的模型。"
+                            icon={FileText}
+                            fieldPrefix="ai.briefing"
+                            form={form}
+                        />
+
+                        {/* 向量嵌入功能卡片 */}
+                        <AIFunctionCard
+                            title="向量嵌入功能"
+                            description="計算文章向量用於事件匹配，需使用 Embedding 模型。"
+                            icon={Binary}
+                            fieldPrefix="ai.embedding"
+                            form={form}
+                        />
                     </TabsContent>
 
                     {/* 內容抓取標籤頁 */}

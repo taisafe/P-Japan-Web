@@ -1,31 +1,11 @@
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { systemSettings } from '@/lib/db/schema';
+import { SETTING_DEFAULTS, SettingKey, AI_PROVIDERS, AIProvider, SettingsValues } from '@/lib/constants/settings';
 
-/**
- * 系統設定的預設值
- */
-export const SETTING_DEFAULTS = {
-    // AI 與翻譯設定
-    'ai.openai_api_key': '',
-    'ai.openai_model': '',
-    'ai.translation_enabled': true,
-    'ai.translation_target_lang': 'zh-CN',
-
-    // 內容抓取設定
-    'fetch.rss_interval_minutes': 30,
-    'fetch.auto_fetch_enabled': false,
-    'fetch.max_articles_per_source': 50,
-
-    // 邏輯演算法設定
-    'algorithm.similarity_threshold': 0.75,
-    'algorithm.keyword_weight': 0.3,
-    'algorithm.embedding_weight': 0.7,
-    'algorithm.recency_decay_hours': 48,
-    'algorithm.source_weight_multiplier': 1.0,
-} as const;
-
-export type SettingKey = keyof typeof SETTING_DEFAULTS;
+// Re-export constants for backward compatibility
+export { SETTING_DEFAULTS, AI_PROVIDERS };
+export type { SettingKey, AIProvider };
 
 /**
  * 取得單一設定值
@@ -145,7 +125,7 @@ export async function updateSetting(key: SettingKey, value: unknown): Promise<vo
  * @param settings 設定鍵值對物件
  */
 export async function updateSettings(
-    settings: Partial<typeof SETTING_DEFAULTS>
+    settings: Partial<SettingsValues>
 ): Promise<void> {
     try {
         for (const [key, value] of Object.entries(settings)) {

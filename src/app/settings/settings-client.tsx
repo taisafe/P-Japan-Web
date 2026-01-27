@@ -1,7 +1,7 @@
 "use client";
 
 import { SettingsForm } from "@/components/settings/settings-form";
-import { SETTING_DEFAULTS } from "@/lib/services/settings";
+import { SETTING_DEFAULTS, SettingsValues } from "@/lib/constants/settings";
 import { saveSettingsAction } from "./actions";
 
 interface SettingsClientProps {
@@ -9,7 +9,7 @@ interface SettingsClientProps {
 }
 
 export function SettingsClient({ initialSettings }: SettingsClientProps) {
-    const handleSave = async (values: typeof SETTING_DEFAULTS) => {
+    const handleSave = async (values: SettingsValues) => {
         await saveSettingsAction(values);
     };
 
