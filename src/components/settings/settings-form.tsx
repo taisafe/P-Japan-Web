@@ -36,6 +36,7 @@ const providerConfigSchema = z.object({
     name: z.string(),
     baseUrl: z.string(),
     apiKey: z.string(),
+    model: z.string().optional().or(z.literal('')),
 });
 
 const settingsSchema = z.object({

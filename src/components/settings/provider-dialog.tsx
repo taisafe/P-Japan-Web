@@ -28,6 +28,7 @@ export function ProviderDialog({ open, onOpenChange, provider, onSave }: Provide
     const [name, setName] = React.useState("");
     const [baseUrl, setBaseUrl] = React.useState("");
     const [apiKey, setApiKey] = React.useState("");
+    const [model, setModel] = React.useState("");
     const [showApiKey, setShowApiKey] = React.useState(false);
 
     const isEditing = !!provider;
@@ -39,10 +40,12 @@ export function ProviderDialog({ open, onOpenChange, provider, onSave }: Provide
                 setName(provider.name);
                 setBaseUrl(provider.baseUrl);
                 setApiKey(provider.apiKey);
+                setModel(provider.model || "");
             } else {
                 setName("");
                 setBaseUrl("");
                 setApiKey("");
+                setModel("");
             }
             setShowApiKey(false);
         }
@@ -54,6 +57,7 @@ export function ProviderDialog({ open, onOpenChange, provider, onSave }: Provide
             name: name.trim() || "自訂提供商",
             baseUrl,
             apiKey,
+            model: model.trim() || undefined,
         };
         onSave(newProvider);
         onOpenChange(false);
@@ -85,6 +89,20 @@ export function ProviderDialog({ open, onOpenChange, provider, onSave }: Provide
                         />
                         <p className="text-xs text-muted-foreground">
                             用於識別此提供商配置
+                        </p>
+                    </div>
+
+                    {/* Default Model */}
+                    <div className="grid gap-2">
+                        <Label htmlFor="model">預設模型 <span className="text-muted-foreground">(選填)</span></Label>
+                        <Input
+                            id="model"
+                            placeholder="例如：gpt-4o, doubao-pro-32k..."
+                            value={model}
+                            onChange={(e) => setModel(e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                            若是專用模型提供商，可在此指定預設模型名稱
                         </p>
                     </div>
 

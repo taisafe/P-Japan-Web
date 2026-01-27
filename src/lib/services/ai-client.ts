@@ -28,7 +28,7 @@ export async function getAIClient(functionType: AIFunctionType): Promise<AIClien
 
     const settings = await getSettings([providerIdKey, modelKey]);
     const providerId = settings[providerIdKey] as string;
-    const model = (settings[modelKey] as string) || getDefaultModel(functionType);
+    const functionModel = settings[modelKey] as string;
 
     if (!providerId) {
         throw new Error(`請先在設定頁面配置 ${getFunctionDisplayName(functionType)} 的 AI 提供商`);
@@ -52,7 +52,10 @@ export async function getAIClient(functionType: AIFunctionType): Promise<AIClien
         throw new Error(`AI 提供商 "${provider.name}" 的 API 金鑰未設定`);
     }
 
-    // 4. 建立 OpenAI 客戶端
+    // 4. 決定模型：功能設定 > 提供商預設 > 系統預設
+    const model = functionModel || provider.model || getDefaultModel(functionType);
+
+    // 5. 建立 OpenAI 客戶端
     const client = new OpenAI({
         apiKey: provider.apiKey,
         baseURL: provider.baseUrl || undefined,

@@ -11,6 +11,7 @@ export interface AIProviderConfig {
     name: string;
     baseUrl: string;
     apiKey: string;
+    model?: string;
 }
 
 /**
