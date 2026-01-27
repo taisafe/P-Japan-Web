@@ -5,6 +5,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/app-sidebar";
 import { GlobalDrawer } from "@/components/global-drawer";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Japan Politics Daily Brief",
@@ -40,6 +41,7 @@ export default function RootLayout({
             <GlobalDrawer />
           </SidebarProvider>
         </ThemeProvider>
+        <Toaster richColors position="bottom-right" />
       </body>
     </html>
   );

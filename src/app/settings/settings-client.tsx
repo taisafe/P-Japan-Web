@@ -1,6 +1,7 @@
 "use client";
 
 import { SettingsForm } from "@/components/settings/settings-form";
+import { BackupSection } from "@/components/settings/backup-section";
 import { SETTING_DEFAULTS, SettingsValues } from "@/lib/constants/settings";
 import { saveSettingsAction } from "./actions";
 
@@ -14,9 +15,13 @@ export function SettingsClient({ initialSettings }: SettingsClientProps) {
     };
 
     return (
-        <SettingsForm
-            initialValues={initialSettings}
-            onSave={handleSave}
-        />
+        <div className="space-y-6">
+            <SettingsForm
+                initialValues={initialSettings}
+                onSave={handleSave}
+            />
+            <BackupSection />
+        </div>
     );
 }
+
