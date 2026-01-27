@@ -1,8 +1,7 @@
 import { db } from '@/lib/db';
-import { events, articles } from '@/lib/db/schema';
-import { desc, gt, inArray, eq } from 'drizzle-orm';
-import OpenAI from 'openai';
-import { getSettings } from '@/lib/services/settings';
+import { events } from '@/lib/db/schema';
+import { desc, gt, inArray } from 'drizzle-orm';
+import { getAIClient } from '@/lib/services/ai-client';
 
 export interface BriefingCandidate {
     id: string;
@@ -70,49 +69,8 @@ export class BriefingService {
                 return { success: false, error: 'Events not found' };
             }
 
-            // 2. Prepare AI Client
-            const settings = await getSettings([
-                'ai.briefing.provider',
-                'ai.briefing.api_key',
-                'ai.briefing.base_url',
-                'ai.briefing.model',
-                // Fallback to translation settings if briefing specific ones aren't set? 
-                // For now, let's assume we reuse translation or have separate keys.
-                // Let's reuse 'ai.translation.*' as a fallback if 'ai.briefing.*' is missing, 
-                // OR just use 'ai.translation.*' base if the user hasn't configured specific briefing AI.
-                // To keep it simple and consistent with the plan "Use existing multi-provider", 
-                // I will grab generic AI settings or specific ones. 
-                // Let's try to grab 'ai.translation.*' as the default "AI Service" for now to avoid forcing user to config twice,
-                // BUT ideally we should have a 'ai.briefing' section. 
-                // CHECK: In conversation 8f2ebf52 (Multi-Provider), did we separate them?
-                // The summary says "independent configuration for each function". So I should look for 'ai.briefing.*'.
-            ]);
-
-            // Assuming user might haven't set briefing keys, we might need a fallback or strict check.
-            // Let's implement strict check but fall back to "translation" keys if that helps? 
-            // No, "independent" means independent.
-
-            // Wait, I should double check if I implemented 'ai.briefing' keys in the settings page.
-            // If I didn't, I should probably use a shared key or the existing translation one.
-            // Let's assume the user HAS NOT set up 'ai.briefing.*' yet.
-            // However, the user said "reuse existing".
-            // Let's try to fetch `ai.briefing.*`, if empty, maybe error out or use OpenAI default.
-            // Actually, safe bet: Use `ai.briefing.*` and if missing, return error asking user to configure.
-
-            // To be safe, I'll fetch `ai.briefing.api_key` etc.
-
-            const apiKey = settings['ai.briefing.api_key'];
-            const baseURL = settings['ai.briefing.base_url'];
-            const model = settings['ai.briefing.model'] || 'gpt-3.5-turbo';
-
-            if (!apiKey) {
-                return { success: false, error: 'Briefing AI settings not configured. Please configure AI settings.' };
-            }
-
-            const client = new OpenAI({
-                apiKey: apiKey,
-                baseURL: baseURL || undefined,
-            });
+            // 2. Prepare AI Client via new provider system
+            const { client, model } = await getAIClient('briefing');
 
             // 3. Construct Prompt
             const eventsText = selectedEvents.map((e, index) => {

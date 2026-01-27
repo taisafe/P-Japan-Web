@@ -10,8 +10,9 @@ interface SettingsClientProps {
 }
 
 export function SettingsClient({ initialSettings }: SettingsClientProps) {
-    const handleSave = async (values: SettingsValues) => {
-        await saveSettingsAction(values);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleSave = async (values: any) => {
+        await saveSettingsAction(values as SettingsValues);
     };
 
     return (

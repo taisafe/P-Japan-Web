@@ -1,8 +1,7 @@
 import { db } from '@/lib/db';
 import { articles } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { getSettings } from '@/lib/services/settings';
-import OpenAI from 'openai';
+import { getAIClient } from '@/lib/services/ai-client';
 
 interface TranslationResult {
     success: boolean;
@@ -11,31 +10,6 @@ interface TranslationResult {
 }
 
 export class TranslationService {
-    private async getClient() {
-        const settings = await getSettings([
-            'ai.translation.provider',
-            'ai.translation.api_key',
-            'ai.translation.base_url',
-            'ai.translation.model'
-        ]);
-
-        const apiKey = settings['ai.translation.api_key'];
-        const baseURL = settings['ai.translation.base_url'];
-
-        if (!apiKey) {
-            throw new Error('Translation API key is not configured');
-        }
-
-        return {
-            client: new OpenAI({
-                apiKey: apiKey,
-                baseURL: baseURL || undefined, // undefined lets OpenAI use default
-            }),
-            model: settings['ai.translation.model'] || 'gpt-3.5-turbo', // Default fallback
-            provider: settings['ai.translation.provider']
-        };
-    }
-
     async translateArticle(articleId: string): Promise<TranslationResult> {
         try {
             // 1. Get article content
@@ -62,8 +36,8 @@ export class TranslationService {
                 return { success: false, error: 'Article has no content to translate' };
             }
 
-            // 3. Initialize LLM Client
-            const { client, model } = await this.getClient();
+            // 3. Initialize LLM Client via new provider system
+            const { client, model } = await getAIClient('translation');
 
             // 4. Construct Prompt
             const systemPrompt = `你是一個專業的日本政治新聞翻譯專家。
