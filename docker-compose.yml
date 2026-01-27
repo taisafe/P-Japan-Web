@@ -7,4 +7,5 @@ services:
       - ./data:/data
     environment:
       - DATABASE_URL=/data/japan-politics.db
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     restart: unless-stopped
