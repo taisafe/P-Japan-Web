@@ -1,12 +1,17 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { HeatScoreBadge } from "@/components/events/heat-score-badge";
 import { formatDistanceToNow } from "date-fns";
 import { zhTW } from "date-fns/locale";
-import type { events, articles } from "@/lib/db/schema";
+import type { events, articles, sources } from "@/lib/db/schema";
 import { type InferSelectModel } from "drizzle-orm";
+import { getScoreBreakdown } from "@/lib/services/scoring";
 
 type Event = InferSelectModel<typeof events>;
-type Article = InferSelectModel<typeof articles>;
+type Article = InferSelectModel<typeof articles> & {
+    source?: InferSelectModel<typeof sources> | null;
+};
 
 interface EventCardProps {
     event: Event;
@@ -14,6 +19,17 @@ interface EventCardProps {
 }
 
 export function EventCard({ event, articles }: EventCardProps) {
+    // Calculate score breakdown for tooltip
+    const articlesWithSources = articles.map(a => ({
+        id: a.id,
+        sourceId: a.sourceId,
+        matchStatus: a.matchStatus as 'confirmed' | 'pending' | 'rejected' | null,
+        publishedAt: a.publishedAt,
+        source: a.source ? { id: a.source.id, weight: a.source.weight } : null,
+    }));
+
+    const breakdown = getScoreBreakdown(event, articlesWithSources);
+
     return (
         <Card className="mb-4 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
@@ -24,9 +40,7 @@ export function EventCard({ event, articles }: EventCardProps) {
                             {event.summary}
                         </CardDescription>
                     </div>
-                    <Badge variant="outline" className="ml-2 whitespace-nowrap">
-                        🔥 {event.heatScore?.toFixed(1) || 0}
-                    </Badge>
+                    <HeatScoreBadge score={event.heatScore} breakdown={breakdown} />
                 </div>
                 <div className="text-xs text-muted-foreground mt-2">
                     最後更新: {event.lastUpdatedAt ? formatDistanceToNow(event.lastUpdatedAt, { addSuffix: true, locale: zhTW }) : 'N/A'}
@@ -40,7 +54,7 @@ export function EventCard({ event, articles }: EventCardProps) {
                                 {article.title}
                             </a>
                             <div className="text-xs text-muted-foreground flex gap-2 mt-1">
-                                <span className="font-semibold text-editorial-pink">{article.sourceId}</span>
+                                <span className="font-semibold text-editorial-pink">{article.source?.name || article.sourceId}</span>
                                 <span>•</span>
                                 <span>{article.publishedAt ? formatDistanceToNow(article.publishedAt, { addSuffix: true, locale: zhTW }) : ''}</span>
                             </div>
@@ -51,3 +65,4 @@ export function EventCard({ event, articles }: EventCardProps) {
         </Card>
     );
 }
+

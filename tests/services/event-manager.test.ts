@@ -9,6 +9,10 @@ const { mockDb } = vi.hoisted(() => {
             query: {
                 events: {
                     findMany: vi.fn(),
+                    findFirst: vi.fn(),
+                },
+                articles: {
+                    findMany: vi.fn(),
                 }
             },
             insert: vi.fn(),
@@ -42,6 +46,9 @@ describe('EventManager', () => {
         vi.resetAllMocks();
         mockDb.insert.mockReturnValue(createChainable());
         mockDb.update.mockReturnValue(createChainable());
+        // Mock for recalculateEventScore
+        mockDb.query.events.findFirst.mockResolvedValue({ id: 'e1', lastUpdatedAt: new Date() });
+        mockDb.query.articles.findMany.mockResolvedValue([]);
     });
 
     const mockArticle: any = {
