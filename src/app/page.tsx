@@ -4,12 +4,13 @@ import { sql } from "drizzle-orm";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Database, Zap, FileText, CheckCircle2 } from "lucide-react";
+import { EventFeed } from "@/components/events/event-feed";
+import { MergeReview } from "@/components/events/merge-review";
 
 async function getStats() {
   try {
@@ -112,11 +113,9 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      <div className="rounded-xl border bg-muted/30 p-8 text-center border-dashed">
-        <h3 className="text-lg font-medium text-muted-foreground">
-          準備開始收集情報。前往「手動錄入」注入第一筆信號，或前往「情報來源」管理監測名單。
-        </h3>
-      </div>
+      <MergeReview />
+
+      <EventFeed />
     </div>
   );
 }

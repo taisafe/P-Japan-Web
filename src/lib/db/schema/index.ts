@@ -1,5 +1,15 @@
 import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
-import { sql } from 'drizzle-orm';
+import { sql, relations } from 'drizzle-orm';
+
+export const events = sqliteTable('events', {
+    id: text('id').primaryKey(),
+    title: text('title').notNull(),
+    summary: text('summary'),
+    heatScore: real('heat_score').default(0),
+    firstSeenAt: integer('first_seen_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+    lastUpdatedAt: integer('last_updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+    status: text('status', { enum: ['active', 'archived', 'merged'] }).default('active'),
+});
 
 export const sources = sqliteTable('sources', {
     id: text('id').primaryKey(),
@@ -25,6 +35,9 @@ export const articles = sqliteTable('articles', {
     description: text('description'),
     author: text('author'),
     heatScore: real('heat_score').default(0),
+    eventId: text('event_id').references(() => events.id),
+    matchConfidence: real('match_confidence'),
+    matchStatus: text('match_status', { enum: ['confirmed', 'pending', 'rejected'] }),
     isPaywalled: integer('is_paywalled', { mode: 'boolean' }).default(false),
     createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
 });
@@ -46,3 +59,20 @@ export const systemLogs = sqliteTable('system_logs', {
     metadata: text('metadata'), // JSON string for extra details
     createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
+
+export const eventsRelations = relations(events, ({ many }) => ({
+    articles: many(articles),
+}));
+
+export const articlesRelations = relations(articles, ({ one }) => ({
+    event: one(events, {
+        fields: [articles.eventId],
+        references: [events.id],
+    }),
+    source: one(sources, {
+        fields: [articles.sourceId],
+        references: [sources.id],
+    }),
+}));
+
+
