@@ -8,6 +8,13 @@
       "when": 1769485089488,
       "tag": "0000_cuddly_dreadnoughts",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1769492594350,
+      "tag": "0001_pretty_wiccan",
+      "breakpoints": true
     }
   ]
 }

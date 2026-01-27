@@ -37,6 +37,12 @@
   --color-input: #e4e4e7;
   --color-ring: #18181b;
 
+  /* Popover 和 Card 元件顏色 */
+  --color-popover: #ffffff;
+  --color-popover-foreground: #171717;
+  --color-card: #ffffff;
+  --color-card-foreground: #171717;
+
   --color-editorial-pink: #ec4899;
 
   --color-sidebar: var(--background);

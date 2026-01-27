@@ -60,6 +60,12 @@ export const systemLogs = sqliteTable('system_logs', {
     createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
+export const systemSettings = sqliteTable('system_settings', {
+    key: text('key').primaryKey(),
+    value: text('value').notNull(), // JSON string
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+});
+
 export const eventsRelations = relations(events, ({ many }) => ({
     articles: many(articles),
 }));
