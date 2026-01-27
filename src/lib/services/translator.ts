@@ -6,6 +6,7 @@ import { getAIClient } from '@/lib/services/ai-client';
 interface TranslationResult {
     success: boolean;
     translatedText?: string;
+    titleCN?: string;
     error?: string;
 }
 
@@ -20,6 +21,7 @@ export class TranslationService {
                     content: true,
                     contentCN: true,
                     title: true,
+                    titleCN: true,
                 }
             });
 
@@ -28,8 +30,8 @@ export class TranslationService {
             }
 
             // 2. Check if already translated
-            if (article.contentCN) {
-                return { success: true, translatedText: article.contentCN };
+            if (article.contentCN && article.titleCN) {
+                return { success: true, translatedText: article.contentCN, titleCN: article.titleCN };
             }
 
             if (!article.content) {
@@ -41,10 +43,10 @@ export class TranslationService {
 
             // 4. Construct Prompt
             const systemPrompt = `你是一個專業的日本政治新聞翻譯專家。
-請將提供的日文新聞內容翻譯成繁體中文 (Traditional Chinese)。
+請將提供的日文新聞內容翻譯成簡體中文 (Simplified Chinese)。
 重點要求：
 1. 保持新聞的客觀語氣。
-2. 準確翻譯日本政治專有名詞 (例如：自民党 -> 自民黨, 衆議院 -> 眾議院)。
+2. 準確翻譯日本政治專有名詞 (例如：自民党 -> 自民党, 衆議院 -> 众议院)。
 3. 輸出格式必須是 Markdown，保留原本的段落結構。
 4. 這是標題：${article.title || '無標題'}
 請直接輸出翻譯後的內容，不要包含任何開場白或結語。`;
@@ -65,12 +67,25 @@ export class TranslationService {
                 return { success: false, error: 'Empty response from AI' };
             }
 
+            // Parallel execution for content and title if needed
+            let newTitleCN = article.titleCN;
+            if (!newTitleCN) {
+                try {
+                    newTitleCN = await this.translateTitle(article.title);
+                } catch (err) {
+                    console.warn('Title translation failed during article translation:', err);
+                }
+            }
+
             // 6. Save to DB
             await db.update(articles)
-                .set({ contentCN: translatedText })
+                .set({
+                    contentCN: translatedText,
+                    titleCN: newTitleCN
+                })
                 .where(eq(articles.id, articleId));
 
-            return { success: true, translatedText };
+            return { success: true, translatedText, titleCN: newTitleCN || undefined };
 
         } catch (error) {
             console.error('Translation failed:', error);
@@ -89,7 +104,7 @@ export class TranslationService {
 
             const completionPromise = client.chat.completions.create({
                 messages: [
-                    { role: 'system', content: 'You are a professional translator. Translate this Japanese news title to Traditional Chinese (Taiwan usage). Output ONLY the translated title.' },
+                    { role: 'system', content: 'You are a professional translator. Translate this Japanese news title to Simplified Chinese. Output ONLY the translated title.' },
                     { role: 'user', content: title }
                 ],
                 model: model,

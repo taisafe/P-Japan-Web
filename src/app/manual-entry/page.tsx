@@ -121,11 +121,12 @@ export default function ManualEntryPage() {
                 router.push("/");
                 router.refresh();
             } else {
-                throw new Error("Failed to publish");
+                const data = await resp.json();
+                throw new Error(data.error || "Failed to publish");
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Manual Submit Error:", error);
-            toast.error("Failed to publish article. Please try again.", { id: toastId });
+            toast.error(error.message || "Failed to publish article. Please try again.", { id: toastId });
         }
     }
 

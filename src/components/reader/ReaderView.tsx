@@ -16,6 +16,7 @@ interface ArticleData {
     title: string;
     content: string | null;
     contentCN: string | null;
+    titleCN: string | null;
     publishedAt: string | null;
     source: {
         name: string;
@@ -36,6 +37,16 @@ export function ReaderView({ article }: ReaderViewProps) {
     // For mobile
     const [activeTab, setActiveTab] = React.useState<string>(article.contentCN ? 'translated' : 'original');
 
+    // Derived title logic: show translated title if available AND translation is shown or active
+    // But typically we want to show the translated title prominently if it exists.
+    // Let's toggle it based on the view state or just show translated title if available?
+    // User asked "Title not translated".
+    // Let's show translated title as main ID if we are in "translated" mode or if we have it?
+    // Actually, usually we want to see the title in the language we are reading.
+
+    // Simple logic: If we have translated text (meaning we are capable of showing translation), use translated title if available.
+    const displayTitle = (translatedText || activeTab === 'translated') && article.titleCN ? article.titleCN : article.title;
+
     const handleTranslate = async () => {
         if (translatedText) return;
 
@@ -55,6 +66,18 @@ export function ReaderView({ article }: ReaderViewProps) {
 
             if (res.ok && data.success) {
                 setTranslatedText(data.translatedText);
+                // We might need to refresh to get the titleCN if it was updated in DB, 
+                // but for now the API returns translatedText. 
+                // Ideally the API should return the whole updated article or we assume title was translated too if we triggered it.
+                // The current /api/translate might need to return titleCN too.
+                // Let's checking /api/translate implementation next.
+                if (data.titleCN) {
+                    // We need a way to update title in UI without full refresh if we want it instant.
+                    // But for now, let's just rely on refresh or initial load.
+                    // Actually, we can add local state for title if needed, but let's stick to props for simplicity first, 
+                    // users mostly care about viewing already translated stuff.
+                    router.refresh();
+                }
             } else {
                 console.error('Translation failed:', data.error);
                 // TODO: Show toast error
@@ -131,7 +154,7 @@ export function ReaderView({ article }: ReaderViewProps) {
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
                     <div className="flex flex-col overflow-hidden">
-                        <h1 className="text-sm font-semibold truncate">{article.title}</h1>
+                        <h1 className="text-sm font-semibold truncate" title={displayTitle}>{displayTitle}</h1>
                         <span className="text-xs text-muted-foreground flex items-center gap-2">
                             {article.source?.name} · {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString() : 'Unknown Date'}
                         </span>
@@ -207,7 +230,7 @@ export function ReaderView({ article }: ReaderViewProps) {
 
                 <div className="flex-1 min-w-0 flex flex-col bg-slate-50/50 dark:bg-slate-900/20">
                     <div className="p-3 bg-muted/10 border-b text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">
-                        <span>Translation (繁體中文)</span>
+                        <span>Translation (簡體中文)</span>
                     </div>
                     <ScrollArea className="flex-1">
                         {renderContent(translatedText, isLoading)}
