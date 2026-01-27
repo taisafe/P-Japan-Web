@@ -7,6 +7,7 @@ export const sources = sqliteTable('sources', {
     url: text('url').notNull(),
     type: text('type', { enum: ['jp', 'en', 'twitter'] }).notNull(),
     category: text('category'), // e.g., 'mainstream', 'parliament', 'independent'
+    weight: real('weight').default(1.0),
     isActive: integer('is_active', { mode: 'boolean' }).default(true),
     lastFetchedAt: integer('last_fetched_at', { mode: 'timestamp' }),
     createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),

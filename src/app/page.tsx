@@ -114,7 +114,7 @@ export default async function DashboardPage() {
 
       <div className="rounded-xl border bg-muted/30 p-8 text-center border-dashed">
         <h3 className="text-lg font-serif italic text-muted-foreground">
-          Ready to begin collection. Head to "Update" to trigger your first scrape.
+          Ready to begin collection. Head to "Manual Entry" to inject your first signal or "Sources" to manage registries.
         </h3>
       </div>
     </div>

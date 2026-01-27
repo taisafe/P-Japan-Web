@@ -6,7 +6,7 @@ import {
     Database,
     Users,
     Settings,
-    RefreshCw,
+    FileText,
 } from "lucide-react";
 
 import {
@@ -38,9 +38,9 @@ const items = [
         icon: Users,
     },
     {
-        title: "Update",
-        url: "/update",
-        icon: RefreshCw,
+        title: "Manual Entry",
+        url: "/manual-entry",
+        icon: FileText,
     },
     {
         title: "Settings",
