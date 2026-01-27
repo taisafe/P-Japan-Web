@@ -23,13 +23,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 
 const formSchema = z.object({
-    name: z.string().min(1, "Name is required"),
+    name: z.string().min(1, "必須填寫名稱"),
     nameJa: z.string().optional(),
     nameKana: z.string().optional(),
     nameEn: z.string().optional(),
     role: z.string().optional(),
     party: z.string().optional(),
-    imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+    imageUrl: z.string().url("必須是有效的網址").optional().or(z.literal("")),
     description: z.string().optional(),
     wikipediaId: z.string().optional(),
 })
@@ -109,9 +109,9 @@ export function PeopleForm({ initialData, onSubmit, onCancel }: PeopleFormProps)
                                     name="name"
                                     render={({ field }) => (
                                         <FormItem className="flex-1">
-                                            <FormLabel>Display Name</FormLabel>
+                                            <FormLabel>顯示名稱</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Fumio Kishida" {...field} />
+                                                <Input placeholder="岸田文雄" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -125,7 +125,7 @@ export function PeopleForm({ initialData, onSubmit, onCancel }: PeopleFormProps)
                                     name="nameJa"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Japanese Name</FormLabel>
+                                            <FormLabel>日文名稱</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="岸田 文雄" {...field} />
                                             </FormControl>
@@ -138,7 +138,7 @@ export function PeopleForm({ initialData, onSubmit, onCancel }: PeopleFormProps)
                                     name="nameKana"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Kana (Reading)</FormLabel>
+                                            <FormLabel>假名 (讀音)</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="きしだ ふみお" {...field} />
                                             </FormControl>
@@ -153,7 +153,7 @@ export function PeopleForm({ initialData, onSubmit, onCancel }: PeopleFormProps)
                                 name="nameEn"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>English Name</FormLabel>
+                                        <FormLabel>英文名稱</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Fumio Kishida" {...field} />
                                         </FormControl>
@@ -172,9 +172,9 @@ export function PeopleForm({ initialData, onSubmit, onCancel }: PeopleFormProps)
                                     name="role"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Role / Title</FormLabel>
+                                            <FormLabel>職位 / 頭銜</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Prime Minister" {...field} />
+                                                <Input placeholder="內閣總理大臣" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -185,9 +185,9 @@ export function PeopleForm({ initialData, onSubmit, onCancel }: PeopleFormProps)
                                     name="party"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Party</FormLabel>
+                                            <FormLabel>政黨</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="LDP" {...field} />
+                                                <Input placeholder="自民黨" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -200,7 +200,7 @@ export function PeopleForm({ initialData, onSubmit, onCancel }: PeopleFormProps)
                                 name="imageUrl"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Image URL</FormLabel>
+                                        <FormLabel>圖片網址</FormLabel>
                                         <div className="flex gap-2">
                                             <FormControl>
                                                 <Input placeholder="https://..." {...field} />
@@ -220,7 +220,7 @@ export function PeopleForm({ initialData, onSubmit, onCancel }: PeopleFormProps)
                                     name="wikipediaId"
                                     render={({ field }) => (
                                         <FormItem className="flex-1">
-                                            <FormLabel>Wikipedia ID / Title</FormLabel>
+                                            <FormLabel>維基百科 ID / 標題</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="岸田文雄" {...field} />
                                             </FormControl>
@@ -242,9 +242,9 @@ export function PeopleForm({ initialData, onSubmit, onCancel }: PeopleFormProps)
                     name="description"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Description</FormLabel>
+                            <FormLabel>描述</FormLabel>
                             <FormControl>
-                                <Textarea placeholder="Short bio..." className="min-h-[100px]" {...field} />
+                                <Textarea placeholder="簡短簡介..." className="min-h-[100px]" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -254,12 +254,12 @@ export function PeopleForm({ initialData, onSubmit, onCancel }: PeopleFormProps)
                 <div className="flex justify-end gap-2">
                     {onCancel && (
                         <Button type="button" variant="outline" onClick={onCancel}>
-                            Cancel
+                            取消
                         </Button>
                     )}
                     <Button type="submit" disabled={isSubmitting}>
                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Save Person
+                        儲存人物
                     </Button>
                 </div>
             </form>

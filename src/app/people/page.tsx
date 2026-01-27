@@ -32,10 +32,10 @@ export default async function PeoplePage({
     return (
         <div className="container mx-auto py-8 space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight">People Console</h1>
+                <h1 className="text-3xl font-bold tracking-tight">人物管理</h1>
                 <Link href="/people/new">
                     <Button>
-                        <Plus className="mr-2 h-4 w-4" /> Add Person
+                        <Plus className="mr-2 h-4 w-4" /> 新增人物
                     </Button>
                 </Link>
             </div>
@@ -45,7 +45,7 @@ export default async function PeoplePage({
                 <form className="flex-1">
                     <Input
                         name="q"
-                        placeholder="Search people..."
+                        placeholder="搜尋人物..."
                         className="border-0 shadow-none focus-visible:ring-0 bg-transparent"
                         defaultValue={query}
                     />
@@ -56,18 +56,18 @@ export default async function PeoplePage({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[80px]">Image</TableHead>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Role / Party</TableHead>
-                            <TableHead>Updated</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead className="w-[80px]">頭像</TableHead>
+                            <TableHead>姓名</TableHead>
+                            <TableHead>職位 / 政黨</TableHead>
+                            <TableHead>更新時間</TableHead>
+                            <TableHead className="text-right">操作</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {people.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                    No people found.
+                                    找不到人物。
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -88,11 +88,11 @@ export default async function PeoplePage({
                                         <div className="text-xs text-muted-foreground">{person.party}</div>
                                     </TableCell>
                                     <TableCell className="text-muted-foreground text-sm">
-                                        {person.updatedAt ? new Date(person.updatedAt).toLocaleDateString() : '-'}
+                                        {person.updatedAt ? new Date(person.updatedAt).toLocaleDateString('zh-TW') : '-'}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <Link href={`/people/${person.id}`}>
-                                            <Button variant="ghost" size="sm">Edit</Button>
+                                            <Button variant="ghost" size="sm">編輯</Button>
                                         </Link>
                                     </TableCell>
                                 </TableRow>

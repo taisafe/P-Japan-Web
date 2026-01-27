@@ -19,8 +19,8 @@ export default async function EditPersonPage({ params }: { params: { id: string 
     return (
         <div className="container mx-auto py-8 max-w-2xl">
             <div className="mb-8">
-                <h1 className="text-2xl font-bold">Edit Person</h1>
-                <p className="text-muted-foreground">Update details for {person.name}</p>
+                <h1 className="text-2xl font-bold">編輯人物</h1>
+                <p className="text-muted-foreground">更新 {person.name} 的詳細資訊</p>
             </div>
 
             <PeopleForm
