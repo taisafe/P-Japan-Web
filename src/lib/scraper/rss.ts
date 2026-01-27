@@ -88,6 +88,10 @@ export async function fetchAllRssSources(runId?: string) {
                 console.error(`RSS Fetch Error for ${source.name}:`, error);
                 await logger.error(`Failed to fetch RSS for ${source.name}: ${error.message}`, 'RSS_FETCHER', { runId, sourceId: source.id });
                 totalErrors++;
+            } finally {
+                await db.update(sources)
+                    .set({ lastFetchedAt: new Date() })
+                    .where(eq(sources.id, source.id));
             }
         }
 

@@ -11,9 +11,12 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, ExternalLink, RefreshCw, Twitter, Globe, Languages } from "lucide-react";
+import { Plus, Trash2, ExternalLink, RefreshCw, Twitter, Globe, Languages, PlayCircle } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import { zhTW } from "date-fns/locale";
 
 interface NewsSource {
     id: string;
@@ -22,11 +25,13 @@ interface NewsSource {
     type: "jp" | "en" | "twitter";
     category: string;
     weight: number;
+    lastFetchedAt?: string | Date;
 }
 
 export default function SourcesPage() {
     const [sources, setSources] = useState<NewsSource[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isFetching, setIsFetching] = useState(false);
 
     const fetchSources = async () => {
         setLoading(true);
@@ -36,27 +41,68 @@ export default function SourcesPage() {
             setSources(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Fetch Sources Error:", error);
+            toast.error("無法載入來源列表");
         } finally {
             setLoading(false);
         }
     };
 
+    const handleManualFetch = async () => {
+        setIsFetching(true);
+        const toastId = toast.loading("正在抓取最新新聞...", { description: "這可能需要幾秒鐘的時間" });
+
+        try {
+            const res = await fetch("/api/manual-update", { method: "POST" });
+            const data = await res.json();
+
+            if (res.ok) {
+                toast.success("抓取完成", {
+                    id: toastId,
+                    description: `成功更新，ID: ${data.updateId}`
+                });
+                // Reload list to see updated lastFetchedAt if API updates it immediately (it might take a moment to propagate if async, but manual-update awaits fetchAllRssSources so it should be done)
+                fetchSources();
+            } else {
+                toast.error("抓取失敗", {
+                    id: toastId,
+                    description: data.error || "未知錯誤"
+                });
+            }
+        } catch (error) {
+            console.error("Manual Fetch Error:", error);
+            toast.error("請求發生錯誤", { id: toastId });
+        } finally {
+            setIsFetching(false);
+        }
+    };
+
     const deleteSource = async (id: string) => {
-        if (!confirm("Are you sure you want to remove this source?")) return;
+        if (!confirm("確定要刪除這個來源嗎？")) return;
 
         try {
             const res = await fetch(`/api/sources/${id}`, { method: "DELETE" });
             if (res.ok) {
                 setSources(sources.filter(s => s.id !== id));
+                toast.success("來源已刪除");
             }
         } catch (error) {
             console.error("Delete Source Error:", error);
+            toast.error("刪除失敗");
         }
     };
 
     useEffect(() => {
         fetchSources();
     }, []);
+
+    const formatDate = (date: string | Date | undefined) => {
+        if (!date) return "-";
+        try {
+            return format(new Date(date), "MM/dd HH:mm", { locale: zhTW });
+        } catch (e) {
+            return "-";
+        }
+    };
 
     return (
         <div className="space-y-8">
@@ -66,6 +112,15 @@ export default function SourcesPage() {
                     <p className="text-muted-foreground">管理簡報系統的新聞來源與社群帳號名單。</p>
                 </div>
                 <div className="flex gap-4">
+                    <Button
+                        variant="secondary"
+                        onClick={handleManualFetch}
+                        disabled={isFetching || loading}
+                        className="gap-2"
+                    >
+                        <PlayCircle className={`h-5 w-5 ${isFetching ? 'animate-spin' : ''}`} />
+                        {isFetching ? '抓取中...' : '立即抓取新聞'}
+                    </Button>
                     <Button variant="outline" size="icon" onClick={fetchSources} disabled={loading}>
                         <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                     </Button>
@@ -92,6 +147,7 @@ export default function SourcesPage() {
                                 <TableHead className="w-[300px] font-bold text-xs py-4 text-muted-foreground">來源名稱</TableHead>
                                 <TableHead className="font-bold text-xs text-muted-foreground">類型</TableHead>
                                 <TableHead className="font-bold text-xs text-muted-foreground">分類標籤</TableHead>
+                                <TableHead className="text-right font-bold text-xs text-muted-foreground">上次抓取</TableHead>
                                 <TableHead className="text-right font-bold text-xs text-muted-foreground">權重</TableHead>
                                 <TableHead className="text-right font-bold text-xs text-muted-foreground">操作</TableHead>
                             </TableRow>
@@ -99,7 +155,7 @@ export default function SourcesPage() {
                         <TableBody>
                             {sources.length === 0 && !loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-48 text-center text-muted-foreground">
+                                    <TableCell colSpan={6} className="h-48 text-center text-muted-foreground">
                                         尚未配置任何來源。系統目前無任何輸入信號。
                                     </TableCell>
                                 </TableRow>
@@ -132,6 +188,11 @@ export default function SourcesPage() {
                                         </TableCell>
                                         <TableCell>
                                             <span className="text-sm font-medium text-muted-foreground">{source.category}</span>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <span className="text-xs font-mono text-muted-foreground">
+                                                {formatDate(source.lastFetchedAt)}
+                                            </span>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <span className="font-mono text-xl font-black text-editorial-pink">
