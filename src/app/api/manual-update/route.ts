@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 import { v4 as uuidv4 } from 'uuid';
+import { fetchAllRssSources } from '@/lib/scraper/rss';
 
 export async function POST(request: Request) {
     const updateId = uuidv4();
@@ -9,11 +10,10 @@ export async function POST(request: Request) {
     try {
         await logger.info(`Manual update started. ID: ${updateId}`, source);
 
-        // Placeholder for actual fetch logic
-        // await fetchAllSources();
+        // Execute RSS Fetch
+        await fetchAllRssSources(updateId);
 
-        // Simulate a delay
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await logger.info(`Manual update completed successfully. ID: ${updateId}`, source);
 
         await logger.info(`Manual update completed successfully. ID: ${updateId}`, source);
 

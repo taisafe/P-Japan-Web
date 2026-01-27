@@ -24,8 +24,9 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Send, Twitter, FileText } from "lucide-react";
+import { ArrowLeft, Send, Twitter, FileText, Sparkles } from "lucide-react";
 import Link from 'next/link';
+import { useState } from "react";
 
 const formSchema = z.object({
     title: z.string().min(2, "Title is required for searchability."),
@@ -38,17 +39,65 @@ const formSchema = z.object({
 
 export default function ManualEntryPage() {
     const router = useRouter();
+    const [isExtracting, setIsExtracting] = useState(false);
+    const [activeTab, setActiveTab] = useState("write");
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: "",
             author: "",
-            url: "https://twitter.com/",
+            url: "",
             content: "",
-            type: "twitter",
+            type: "web",
             isPaywalled: false,
         },
     });
+
+    // Watch content for preview
+    const contentValue = form.watch("content");
+
+    async function onExtract() {
+        const urlToCheck = form.getValues("url");
+        if (!urlToCheck) {
+            form.setError("url", { message: "Please enter a URL to extract from." });
+            return;
+        }
+
+        setIsExtracting(true);
+        try {
+            const resp = await fetch("/api/articles/extract", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: urlToCheck }),
+            });
+
+            if (!resp.ok) {
+                const err = await resp.json();
+                throw new Error(err.error || "Extraction failed");
+            }
+
+            const data = await resp.json();
+
+            // Auto-fill form
+            form.setValue("title", data.title || "");
+            form.setValue("content", data.content || "");
+            form.setValue("author", data.author || data.siteName || "");
+
+            // If it seems like a tweet, switch type
+            if (urlToCheck.includes("twitter.com") || urlToCheck.includes("x.com")) {
+                form.setValue("type", "twitter");
+            } else {
+                form.setValue("type", "web");
+            }
+
+        } catch (error: any) {
+            console.error("Extraction error:", error);
+            form.setError("url", { message: error.message || "Failed to extract content." });
+        } finally {
+            setIsExtracting(false);
+        }
+    }
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
@@ -85,8 +134,24 @@ export default function ManualEntryPage() {
                     <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
                         <div className="space-y-8">
                             <Card className="border-t-4 border-t-editorial-pink shadow-lg">
-                                <CardHeader>
+                                <CardHeader className="flex flex-row items-center justify-between">
                                     <CardTitle className="text-2xl font-semibold">文章 / 推文內容</CardTitle>
+                                    <div className="flex bg-muted rounded-lg p-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveTab("write")}
+                                            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === "write" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                                        >
+                                            編輯
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveTab("preview")}
+                                            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === "preview" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                                        >
+                                            預覽
+                                        </button>
+                                    </div>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     <FormField
@@ -103,28 +168,84 @@ export default function ManualEntryPage() {
                                         )}
                                     />
 
-                                    <FormField
-                                        control={form.control}
-                                        name="content"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="font-bold text-xs text-muted-foreground">內容全文</FormLabel>
-                                                <FormControl>
-                                                    <Textarea
-                                                        placeholder="在此貼上推文全文或文章內容..."
-                                                        className="min-h-[400px] text-lg leading-relaxed border-none bg-muted/10 focus-visible:ring-0 px-0 resize-none font-sans"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                    {activeTab === "write" ? (
+                                        <FormField
+                                            control={form.control}
+                                            name="content"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="font-bold text-xs text-muted-foreground">內容全文 (Markdown)</FormLabel>
+                                                    <FormControl>
+                                                        <Textarea
+                                                            placeholder="在此貼上推文全文或文章內容..."
+                                                            className="min-h-[400px] text-lg leading-relaxed border-none bg-muted/10 focus-visible:ring-0 px-0 resize-none font-sans font-normal"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    ) : (
+                                        <div className="min-h-[400px] p-6 bg-muted/10 rounded-md prose prose-stone max-w-none dark:prose-invert">
+                                            {contentValue ? (
+                                                <div dangerouslySetInnerHTML={{ __html: contentValue.replace(/\n/g, "<br/>") }} />
+                                            ) : (
+                                                <p className="text-muted-foreground italic">尚未輸入內容...</p>
+                                            )}
+                                            {/* Note: A real markdown renderer would be better here, but simple breaklines work for now as a basic preview */}
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         </div>
 
                         <aside className="space-y-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">快速提取</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="url"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>來源連結 URL</FormLabel>
+                                                <div className="flex gap-2">
+                                                    <FormControl>
+                                                        <Input placeholder="https://..." className="text-xs font-mono" {...field} />
+                                                    </FormControl>
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="secondary"
+                                                    className="w-full mt-2"
+                                                    onClick={onExtract}
+                                                    disabled={isExtracting}
+                                                >
+                                                    {isExtracting ? (
+                                                        <>
+                                                            <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                                                            解析中...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Sparkles className="mr-2 h-4 w-4" />
+                                                            自動提取內容
+                                                        </>
+                                                    )}
+                                                </Button>
+                                                <FormMessage />
+                                                <FormDescription className="text-xs">
+                                                    輸入網址後點擊提取，系統將嘗試自動抓取標題與正文。
+                                                </FormDescription>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </CardContent>
+                            </Card>
+
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">中繼資料細節</CardTitle>
@@ -167,20 +288,6 @@ export default function ManualEntryPage() {
                                                 <FormLabel>作者 / ID</FormLabel>
                                                 <FormControl>
                                                     <Input placeholder="@username" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="url"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>來源連結 URL</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="https://..." className="text-xs font-mono" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
