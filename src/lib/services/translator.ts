@@ -80,6 +80,30 @@ export class TranslationService {
             };
         }
     }
+    async translateTitle(title: string): Promise<string> {
+        try {
+            const { client, model } = await getAIClient('translation');
+
+            // Add 15s timeout
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Translation Timeout")), 15000));
+
+            const completionPromise = client.chat.completions.create({
+                messages: [
+                    { role: 'system', content: 'You are a professional translator. Translate this Japanese news title to Traditional Chinese (Taiwan usage). Output ONLY the translated title.' },
+                    { role: 'user', content: title }
+                ],
+                model: model,
+                temperature: 0.3,
+            });
+
+            const completion = await Promise.race([completionPromise, timeoutPromise]) as any;
+
+            return completion.choices[0]?.message?.content?.trim() || "";
+        } catch (error) {
+            console.error('Title translation failed:', error);
+            return "";
+        }
+    }
 }
 
 export const translationService = new TranslationService();

@@ -7,6 +7,8 @@ import {
     Users,
     Settings,
     FileText,
+    Newspaper,
+    Flame,
 } from "lucide-react";
 
 import {
@@ -28,6 +30,11 @@ const items = [
         icon: Home,
     },
     {
+        title: "最新動態",
+        url: "/updates",
+        icon: Newspaper,
+    },
+    {
         title: "情報來源",
         url: "/sources",
         icon: Database,
@@ -36,6 +43,11 @@ const items = [
         title: "人物追蹤",
         url: "/people",
         icon: Users,
+    },
+    {
+        title: "事件追蹤",
+        url: "/events",
+        icon: Flame,
     },
     {
         title: "手動錄入",

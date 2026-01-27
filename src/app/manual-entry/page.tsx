@@ -27,6 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Send, Twitter, FileText, Sparkles } from "lucide-react";
 import Link from 'next/link';
 import { useState } from "react";
+import { toast } from "sonner";
 
 const formSchema = z.object({
     title: z.string().min(2, "Title is required for searchability."),
@@ -57,6 +58,8 @@ export default function ManualEntryPage() {
     // Watch content for preview
     const contentValue = form.watch("content");
 
+
+
     async function onExtract() {
         const urlToCheck = form.getValues("url");
         if (!urlToCheck) {
@@ -65,6 +68,7 @@ export default function ManualEntryPage() {
         }
 
         setIsExtracting(true);
+        const toastId = toast.loading("Fetching content...");
         try {
             const resp = await fetch("/api/articles/extract", {
                 method: "POST",
@@ -90,16 +94,19 @@ export default function ManualEntryPage() {
             } else {
                 form.setValue("type", "web");
             }
+            toast.success("Content extracted successfully!", { id: toastId });
 
         } catch (error: any) {
             console.error("Extraction error:", error);
             form.setError("url", { message: error.message || "Failed to extract content." });
+            toast.error(error.message || "Extraction failed", { id: toastId });
         } finally {
             setIsExtracting(false);
         }
     }
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
+        const toastId = toast.loading("Publishing article...");
         try {
             const resp = await fetch("/api/articles/manual", {
                 method: "POST",
@@ -110,11 +117,15 @@ export default function ManualEntryPage() {
                 }),
             });
             if (resp.ok) {
+                toast.success("Article published successfully!", { id: toastId });
                 router.push("/");
                 router.refresh();
+            } else {
+                throw new Error("Failed to publish");
             }
         } catch (error) {
             console.error("Manual Submit Error:", error);
+            toast.error("Failed to publish article. Please try again.", { id: toastId });
         }
     }
 

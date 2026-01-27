@@ -6,6 +6,7 @@ import { extractFromUrl } from './extractor';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/lib/logger';
 import { processArticle } from '@/lib/services/event-manager';
+import { translationService } from '@/lib/services/translator';
 
 const parser = new Parser();
 
@@ -48,7 +49,12 @@ export async function fetchAllRssSources(runId?: string) {
                         console.warn(`Extraction failed for ${item.link}, using RSS snippet.`);
                     }
 
-                    // Insert
+                    // Translate Title immediately
+                    let titleCN = "";
+                    if (source.type === 'jp') {
+                        titleCN = await translationService.translateTitle(item.title || "");
+                    }
+
                     // Insert
                     const newArticle = {
                         id: uuidv4(),
@@ -58,6 +64,7 @@ export async function fetchAllRssSources(runId?: string) {
                         publishedAt: item.pubDate ? new Date(item.pubDate) : new Date(),
                         content: content,
                         contentCN: null,
+                        titleCN: titleCN || null,
                         rawHtml: null,
                         author: details.author || item.creator || item.author,
                         description: details.excerpt || item.contentSnippet,

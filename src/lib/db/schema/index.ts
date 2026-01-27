@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, real, primaryKey, index } from 'drizzle-orm/sqlite-core';
 import { sql, relations } from 'drizzle-orm';
 
 export const events = sqliteTable('events', {
@@ -31,6 +31,8 @@ export const articles = sqliteTable('articles', {
     publishedAt: integer('published_at', { mode: 'timestamp' }),
     content: text('content'), // Cleaned text content
     contentCN: text('content_cn'), // Optional translated content
+    titleCN: text('title_cn'),
+    tags: text('tags', { mode: 'json' }), // JSON array of strings
     rawHtml: text('raw_html'),
     description: text('description'),
     author: text('author'),
@@ -83,11 +85,20 @@ export const people = sqliteTable('people', {
     updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
+export const articlePeople = sqliteTable('article_people', {
+    articleId: text('article_id').notNull().references(() => articles.id),
+    personId: text('person_id').notNull().references(() => people.id),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (t) => ({
+    pk: primaryKey({ columns: [t.articleId, t.personId] }),
+    idx: index('article_people_article_idx').on(t.articleId),
+}));
+
 export const eventsRelations = relations(events, ({ many }) => ({
     articles: many(articles),
 }));
 
-export const articlesRelations = relations(articles, ({ one }) => ({
+export const articlesRelations = relations(articles, ({ one, many }) => ({
     event: one(events, {
         fields: [articles.eventId],
         references: [events.id],
@@ -96,6 +107,22 @@ export const articlesRelations = relations(articles, ({ one }) => ({
         fields: [articles.sourceId],
         references: [sources.id],
     }),
+    articlePeople: many(articlePeople),
+}));
+
+export const articlePeopleRelations = relations(articlePeople, ({ one }) => ({
+    article: one(articles, {
+        fields: [articlePeople.articleId],
+        references: [articles.id],
+    }),
+    person: one(people, {
+        fields: [articlePeople.personId],
+        references: [people.id],
+    }),
+}));
+
+export const peopleRelations = relations(people, ({ many }) => ({
+    articlePeople: many(articlePeople),
 }));
 
 
