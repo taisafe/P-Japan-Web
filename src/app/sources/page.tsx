@@ -62,8 +62,8 @@ export default function SourcesPage() {
         <div className="space-y-8">
             <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                    <h1 className="font-serif text-4xl font-bold tracking-tight italic">Intelligence Sources</h1>
-                    <p className="text-muted-foreground">Manage the publications and handles feeding the briefing system.</p>
+                    <h1 className="font-serif text-4xl font-bold tracking-tight italic">情報來源管理</h1>
+                    <p className="text-muted-foreground">管理簡報系統的新聞來源與社群帳號名單。</p>
                 </div>
                 <div className="flex gap-4">
                     <Button variant="outline" size="icon" onClick={fetchSources} disabled={loading}>
@@ -72,7 +72,7 @@ export default function SourcesPage() {
                     <Button asChild className="bg-editorial-pink hover:bg-editorial-pink/90 text-white font-serif italic">
                         <Link href="/sources/new">
                             <Plus className="mr-2 h-5 w-5" />
-                            Commission New Source
+                            新增情報來源
                         </Link>
                     </Button>
                 </div>
@@ -81,7 +81,7 @@ export default function SourcesPage() {
             <Card className="border-t-4 border-t-editorial-pink shadow-xl overflow-hidden">
                 <CardHeader className="bg-muted/30">
                     <CardTitle className="font-serif italic text-xl flex items-center justify-between">
-                        Active Registries
+                        收錄名單
                         <Badge variant="secondary" className="font-mono">{sources.length}</Badge>
                     </CardTitle>
                 </CardHeader>
@@ -89,18 +89,18 @@ export default function SourcesPage() {
                     <Table>
                         <TableHeader className="bg-muted/10">
                             <TableRow className="hover:bg-transparent">
-                                <TableHead className="w-[300px] font-bold uppercase tracking-widest text-xs py-4">Source Name</TableHead>
-                                <TableHead className="font-bold uppercase tracking-widest text-xs">Type</TableHead>
-                                <TableHead className="font-bold uppercase tracking-widest text-xs">Category</TableHead>
-                                <TableHead className="text-right font-bold uppercase tracking-widest text-xs">H.Weight</TableHead>
-                                <TableHead className="text-right font-bold uppercase tracking-widest text-xs">Actions</TableHead>
+                                <TableHead className="w-[300px] font-bold uppercase tracking-widest text-xs py-4">來源名稱</TableHead>
+                                <TableHead className="font-bold uppercase tracking-widest text-xs">類型</TableHead>
+                                <TableHead className="font-bold uppercase tracking-widest text-xs">分類標籤</TableHead>
+                                <TableHead className="text-right font-bold uppercase tracking-widest text-xs">權重</TableHead>
+                                <TableHead className="text-right font-bold uppercase tracking-widest text-xs">操作</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {sources.length === 0 && !loading ? (
                                 <TableRow>
                                     <TableCell colSpan={5} className="h-48 text-center text-muted-foreground italic">
-                                        No sources commissioned yet. The system is silent.
+                                        尚未配置任何來源。系統目前無任何輸入信號。
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -159,25 +159,25 @@ export default function SourcesPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="bg-muted/20 border-none shadow-none">
                     <CardContent className="pt-6">
-                        <h4 className="font-bold text-xs uppercase tracking-widest text-muted-foreground mb-2">Heat Score Algorithm</h4>
+                        <h4 className="font-bold text-xs uppercase tracking-widest text-muted-foreground mb-2">熱度加權算法</h4>
                         <p className="text-sm italic leading-relaxed">
-                            Sources with higher weight (Authority Weight) multiply the raw score of articles they publish, accelerating their visibility in the Daily Briefing.
+                            權重較高（Authority Weight）的來源會放大其發布文章的原始分數，使其在每日簡報中獲得更高的可見度。
                         </p>
                     </CardContent>
                 </Card>
                 <Card className="bg-muted/20 border-none shadow-none">
                     <CardContent className="pt-6">
-                        <h4 className="font-bold text-xs uppercase tracking-widest text-muted-foreground mb-2">Translation Pipeline</h4>
+                        <h4 className="font-bold text-xs uppercase tracking-widest text-muted-foreground mb-2">翻譯流水線</h4>
                         <p className="text-sm italic leading-relaxed">
-                            Japanese sources listed here are automatically filtered into the AI translation pipeline for cross-referencing against English reporting.
+                            此處列出的日文來源將自動進入 AI 翻譯流程，以便與英文報導進行交叉比對。
                         </p>
                     </CardContent>
                 </Card>
                 <Card className="bg-muted/20 border-none shadow-none">
                     <CardContent className="pt-6">
-                        <h4 className="font-bold text-xs uppercase tracking-widest text-muted-foreground mb-2">X/Twitter Scrubbing</h4>
+                        <h4 className="font-bold text-xs uppercase tracking-widest text-muted-foreground mb-2">X/Twitter 監控</h4>
                         <p className="text-sm italic leading-relaxed">
-                            Handles registered as Intelligence Sources are monitored for high-engagement political discourse using headless scraping nodes.
+                            註冊為情報來源的 Twitter 帳號將會被 headless 節點持續監控，捕捉高互動的政治討論。
                         </p>
                     </CardContent>
                 </Card>

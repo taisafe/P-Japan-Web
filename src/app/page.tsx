@@ -39,17 +39,17 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-4xl font-bold tracking-tight italic">System Dashboard</h1>
+          <h1 className="font-serif text-4xl font-bold tracking-tight italic">系統儀表板</h1>
           <p className="text-muted-foreground mt-1 text-lg">
-            Monitor news collection and system health.
+            監控新聞蒐集系統與服務健康狀態。
           </p>
         </div>
-        <Badge variant={stats.dbStatus === "Connected" ? "default" : "destructive"} className="px-3 py-1">
+        <Badge variant={stats.dbStatus === "Connected" ? "default" : "destructive"} className="px-3 py-1 self-start md:self-center">
           <div className="flex items-center gap-1.5 font-medium">
             <div className={`h-2 w-2 rounded-full ${stats.dbStatus === "Connected" ? "bg-green-500" : "bg-red-500"}`} />
-            DB: {stats.dbStatus}
+            資料庫: {stats.dbStatus === "Connected" ? "已連線" : "斷線"}
           </div>
         </Badge>
       </div>
@@ -58,42 +58,42 @@ export default async function DashboardPage() {
         <Card className="border-l-4 border-l-editorial-pink shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Total Sources
+              總情報來源
             </CardTitle>
             <Database className="h-4 w-4 text-editorial-pink" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.sources}</div>
-            <p className="text-xs text-muted-foreground mt-1 font-medium">Configured JP/EN outlets</p>
+            <p className="text-xs text-muted-foreground mt-1 font-medium">已配置的日文/英文媒體</p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-editorial-pink shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Total Articles
+              已收錄文章
             </CardTitle>
             <FileText className="h-4 w-4 text-editorial-pink" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.articles}</div>
-            <p className="text-xs text-muted-foreground mt-1 font-medium">Processed entries in DB</p>
+            <p className="text-xs text-muted-foreground mt-1 font-medium">資料庫中的處理條目</p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-green-500 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Last Fetch Run
+              上次抓取執行
             </CardTitle>
             <Zap className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-lg font-bold truncate">
-              {stats.lastRun?.status === "completed" ? "Successfully Done" : stats.lastRun?.status || "No runs yet"}
+              {stats.lastRun?.status === "completed" ? "執行成功" : stats.lastRun?.status || "尚未執行"}
             </div>
             <p className="text-xs text-muted-foreground mt-1 font-medium">
-              {stats.lastRun?.completedAt ? new Date(stats.lastRun.completedAt).toLocaleString() : "---"}
+              {stats.lastRun?.completedAt ? new Date(stats.lastRun.completedAt).toLocaleString('zh-TW') : "---"}
             </p>
           </CardContent>
         </Card>
@@ -101,20 +101,20 @@ export default async function DashboardPage() {
         <Card className="border-l-4 border-l-blue-500 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Daily Brief Ready
+              自動簡報生成
             </CardTitle>
             <CheckCircle2 className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">Waiting</div>
-            <p className="text-xs text-muted-foreground mt-1 font-medium">Generate after fetching</p>
+            <div className="text-3xl font-bold">待機中</div>
+            <p className="text-xs text-muted-foreground mt-1 font-medium">抓取完成後自動觸發</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="rounded-xl border bg-muted/30 p-8 text-center border-dashed">
         <h3 className="text-lg font-serif italic text-muted-foreground">
-          Ready to begin collection. Head to "Manual Entry" to inject your first signal or "Sources" to manage registries.
+          準備開始收集情報。前往「手動錄入」注入第一筆信號，或前往「情報來源」管理監測名單。
         </h3>
       </div>
     </div>

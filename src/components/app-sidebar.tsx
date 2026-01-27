@@ -23,27 +23,27 @@ import {
 
 const items = [
     {
-        title: "Dashboard",
+        title: "儀表板",
         url: "/",
         icon: Home,
     },
     {
-        title: "Sources",
+        title: "情報來源",
         url: "/sources",
         icon: Database,
     },
     {
-        title: "People",
+        title: "人物追蹤",
         url: "/people",
         icon: Users,
     },
     {
-        title: "Manual Entry",
+        title: "手動錄入",
         url: "/manual-entry",
         icon: FileText,
     },
     {
-        title: "Settings",
+        title: "系統設置",
         url: "/settings",
         icon: Settings,
     },
@@ -58,7 +58,7 @@ export function AppSidebar() {
                         <span className="font-serif text-xl font-bold italic">J</span>
                     </div>
                     <span className="font-serif text-sm font-semibold italic tracking-tight group-data-[collapsible=icon]:hidden">
-                        Japan Politics
+                        日本政情簡報
                     </span>
                 </div>
             </SidebarHeader>

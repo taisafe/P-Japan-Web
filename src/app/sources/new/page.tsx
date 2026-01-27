@@ -71,12 +71,12 @@ export default function NewSourcePage() {
                         <ArrowLeft className="h-6 w-6" />
                     </Link>
                 </Button>
-                <h1 className="font-serif text-4xl font-bold tracking-tight italic">Register New Source</h1>
+                <h1 className="font-serif text-4xl font-bold tracking-tight italic">新增情報來源</h1>
             </div>
 
             <Card className="border-t-4 border-t-editorial-pink shadow-lg">
                 <CardHeader>
-                    <CardTitle className="font-serif italic text-2xl">Source Identity</CardTitle>
+                    <CardTitle className="font-serif italic text-2xl">來源基本資料</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -87,9 +87,9 @@ export default function NewSourcePage() {
                                     name="name"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">Outlet Name</FormLabel>
+                                            <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">媒體名稱</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="e.g., Nikkei Politics" className="font-serif italic text-lg" {...field} />
+                                                <Input placeholder="例如：日經新聞政治版" className="font-serif italic text-lg" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -101,17 +101,17 @@ export default function NewSourcePage() {
                                     name="type"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">Region / Platform</FormLabel>
+                                            <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">地區 / 平台</FormLabel>
                                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger className="font-medium">
-                                                        <SelectValue placeholder="Select type" />
+                                                        <SelectValue placeholder="選擇類型" />
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
-                                                    <SelectItem value="jp">Japanese Media</SelectItem>
-                                                    <SelectItem value="en">English Media</SelectItem>
-                                                    <SelectItem value="twitter">Twitter (X) List/Acc</SelectItem>
+                                                    <SelectItem value="jp">日本媒體 (Japanese)</SelectItem>
+                                                    <SelectItem value="en">英語媒體 (English)</SelectItem>
+                                                    <SelectItem value="twitter">Twitter (X) 帳號/清單</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
@@ -125,11 +125,11 @@ export default function NewSourcePage() {
                                 name="url"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">RSS / Home URL</FormLabel>
+                                        <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">RSS 訂閱 / 首頁 URL</FormLabel>
                                         <FormControl>
                                             <Input placeholder="https://..." className="font-mono text-sm" {...field} />
                                         </FormControl>
-                                        <FormDescription>The primary URL for automated fetching or reference.</FormDescription>
+                                        <FormDescription>用於自動化抓取的目標網址。</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -141,9 +141,9 @@ export default function NewSourcePage() {
                                     name="category"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">Category Tag</FormLabel>
+                                            <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">分類標籤</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="mainstream, diet, policy..." {...field} />
+                                                <Input placeholder="例如：主流媒體, 國會動態..." {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -155,7 +155,7 @@ export default function NewSourcePage() {
                                     name="weight"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">Authority Weight (1.0 - 5.0)</FormLabel>
+                                            <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">權威權重 (1.0 - 5.0)</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="number"
@@ -165,7 +165,7 @@ export default function NewSourcePage() {
                                                     className="font-mono font-bold text-editorial-pink"
                                                 />
                                             </FormControl>
-                                            <FormDescription>Higher weight impacts Heat Score more significantly.</FormDescription>
+                                            <FormDescription>權重越高，該來源的文章熱度初始值越高。</FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -175,7 +175,7 @@ export default function NewSourcePage() {
                             <div className="pt-4">
                                 <Button type="submit" className="w-full bg-editorial-pink hover:bg-editorial-pink/90 h-12 text-lg font-serif italic">
                                     <Save className="mr-2 h-5 w-5" />
-                                    Save Source Profile
+                                    儲存來源設定
                                 </Button>
                             </div>
                         </form>

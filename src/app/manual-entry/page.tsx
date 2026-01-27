@@ -77,7 +77,7 @@ export default function ManualEntryPage() {
                         <ArrowLeft className="h-6 w-6" />
                     </Link>
                 </Button>
-                <h1 className="font-serif text-4xl font-bold tracking-tight italic">Manual Content Entry</h1>
+                <h1 className="font-serif text-4xl font-bold tracking-tight italic">手動情報錄入</h1>
             </div>
 
             <Form {...form}>
@@ -86,7 +86,7 @@ export default function ManualEntryPage() {
                         <div className="space-y-8">
                             <Card className="border-t-4 border-t-editorial-pink shadow-lg">
                                 <CardHeader>
-                                    <CardTitle className="font-serif italic text-2xl">Article / Tweet Body</CardTitle>
+                                    <CardTitle className="font-serif italic text-2xl">文章 / 推文內容</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     <FormField
@@ -94,9 +94,9 @@ export default function ManualEntryPage() {
                                         name="title"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">Subject / Headline</FormLabel>
+                                                <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">標題 / 主旨</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Enter a brief summary headline..." className="font-serif italic text-xl border-none bg-muted/20 focus-visible:ring-0 px-0 h-auto" {...field} />
+                                                    <Input placeholder="輸入簡短的摘要標題..." className="font-serif italic text-xl border-none bg-muted/20 focus-visible:ring-0 px-0 h-auto" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -108,10 +108,10 @@ export default function ManualEntryPage() {
                                         name="content"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">Full Content Paste</FormLabel>
+                                                <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">內容全文</FormLabel>
                                                 <FormControl>
                                                     <Textarea
-                                                        placeholder="Paste the tweet text or full article content here..."
+                                                        placeholder="在此貼上推文全文或文章內容..."
                                                         className="min-h-[400px] font-sans text-lg leading-relaxed border-none bg-muted/10 focus-visible:ring-0 px-0 resize-none"
                                                         {...field}
                                                     />
@@ -127,7 +127,7 @@ export default function ManualEntryPage() {
                         <aside className="space-y-6">
                             <Card>
                                 <CardHeader>
-                                    <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Meta Details</CardTitle>
+                                    <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">中繼資料細節</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <FormField
@@ -135,11 +135,11 @@ export default function ManualEntryPage() {
                                         name="type"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Content Type</FormLabel>
+                                                <FormLabel>內容類型</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>
-                                                            <SelectValue placeholder="Select type" />
+                                                            <SelectValue placeholder="選擇類型" />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
@@ -150,7 +150,7 @@ export default function ManualEntryPage() {
                                                         </SelectItem>
                                                         <SelectItem value="web">
                                                             <div className="flex items-center gap-2">
-                                                                <FileText className="h-4 w-4 text-rose-500" /> Web Article
+                                                                <FileText className="h-4 w-4 text-rose-500" /> 網路文章
                                                             </div>
                                                         </SelectItem>
                                                     </SelectContent>
@@ -164,7 +164,7 @@ export default function ManualEntryPage() {
                                         name="author"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Author / Handle</FormLabel>
+                                                <FormLabel>作者 / ID</FormLabel>
                                                 <FormControl>
                                                     <Input placeholder="@username" {...field} />
                                                 </FormControl>
@@ -178,7 +178,7 @@ export default function ManualEntryPage() {
                                         name="url"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Source URL</FormLabel>
+                                                <FormLabel>來源連結 URL</FormLabel>
                                                 <FormControl>
                                                     <Input placeholder="https://..." className="text-xs font-mono" {...field} />
                                                 </FormControl>
@@ -190,14 +190,14 @@ export default function ManualEntryPage() {
                                     <div className="pt-4">
                                         <Button type="submit" className="w-full bg-editorial-pink hover:bg-editorial-pink/90 h-12 text-lg font-serif italic">
                                             <Send className="mr-2 h-5 w-5" />
-                                            Publish
+                                            發布至簡報系統
                                         </Button>
                                     </div>
                                 </CardContent>
                             </Card>
 
                             <div className="p-4 rounded-lg bg-muted/50 border border-dashed border-muted-foreground/30 text-sm text-muted-foreground italic">
-                                Note: Manual entries bypass automated scoring buffers and are treated as verified high-priority signals by default.
+                                注意：手動錄入的資料將繞過自動評分緩衝區，預設被視為已驗證的高優先級信號。
                             </div>
                         </aside>
                     </div>
