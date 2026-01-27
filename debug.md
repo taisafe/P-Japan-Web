@@ -129,3 +129,49 @@
 *   **Yahoo News**：成功抓取，內容不再包含排行榜。
 *   **發布功能**：點擊發布後能順利跳轉，並有成功提示。
 *   **自動化**：Docker 環境已更新支援 Chromium，部署後可自動運行。
+
+---
+
+# 手動錄入 500 錯誤與翻譯優化除錯紀錄 (Debug Log)
+
+## 1. 手動錄入 500 錯誤 (Internal Server Error)
+
+### 1.1 問題描述
+用戶在手動錄入文章時，點擊「發佈至簡報系統」遭遇 500 錯誤，後端日誌顯示 `Failed to save manually entered content`。
+
+### 1.2 問題分析
+*   **Schema 不匹配**：前端表單傳送了 `type` 欄位（用於區分 Twitter/Web），但資料庫 `articles` 表中並無此欄位。直接使用 `...body` 擴展並插入資料庫導致 SQLite 報錯。
+*   **日期格式錯誤**：前端傳送的 `publishedAt` 可能為字串格式，而 Drizzle ORM / SQLite 在某些配置下預期 Date 物件或特定的 Timestamp 格式。
+*   **唯一性約束**：URL 欄位設有 UNIQUE 約束，若重複提交會導致崩潰，且未被優雅捕獲。
+
+### 1.3 解決方案
+*   **後端 (`route.ts`)**：
+    *   移除 `...body` 的直接使用，改為顯式提取並解構需要的欄位 (`title`, `url`, `content` 等)。
+    *   過濾掉不存在於 Schema 的 `type` 欄位。
+    *   強制將 `publishedAt` 轉換為 `new Date()` 物件。
+    *   新增針對 `SQLITE_CONSTRAINT_UNIQUE` 的錯誤處理，返回 409 Conflict 狀態碼。
+*   **前端 (`page.tsx`)**：
+    *   優化錯誤處理邏輯，解析後端返回的 JSON 錯誤訊息，並透過 Toast 顯示具體錯誤（如「URL 已存在」），而非通用的「發布失敗」。
+
+---
+
+## 2. 翻譯語言與標題缺失修復
+
+### 2.1 問題描述
+*   **語言不符**：AI 翻譯預設輸出為繁體中文（台灣），但用戶期望為簡體中文。
+*   **標題未翻譯**：文章正文翻譯後，標題仍維持日文，且在閱讀器介面中未顯示翻譯後的標題。
+
+### 2.2 解決方案
+*   **服務層 (`translator.ts`)**：
+    *   修改 System Prompt，明確要求輸出「簡體中文 (Simplified Chinese)」。
+    *   更新 `translateArticle` 邏輯，在翻譯正文的同時，若發現 `titleCN` 為空，則並行觸發標題翻譯，並將結果一併存入資料庫。
+    *   更新 `TranslationResult` 介面以包含 `titleCN`。
+*   **API 層 (`api/translate/route.ts`)**：
+    *   更新 Response 結構，回傳 `titleCN`。
+*   **前端 (`ReaderView.tsx`)**：
+    *   更新介面顯示，將標籤改為「簡體中文」。
+    *   新增邏輯：若存在翻譯標題 (`titleCN`) 且當前處於翻譯檢視模式，則在頂部 Header 優先顯示翻譯後的標題。
+
+## 3. 驗證結果
+*   手動錄入不再報錯，重複 URL 會提示警告。
+*   點擊翻譯後，正文與標題皆正確轉換為簡體中文，並即時更新於 UI。
