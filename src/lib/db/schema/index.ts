@@ -37,3 +37,12 @@ export const fetchRuns = sqliteTable('fetch_runs', {
     log: text('log'),
     errorCount: integer('error_count').default(0),
 });
+
+export const systemLogs = sqliteTable('system_logs', {
+    id: text('id').primaryKey(),
+    level: text('level', { enum: ['info', 'warn', 'error'] }).notNull(),
+    message: text('message').notNull(),
+    source: text('source'), // e.g., 'MANUAL_UPDATE', 'SYSTEM', 'FETCHER'
+    metadata: text('metadata'), // JSON string for extra details
+    createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+});

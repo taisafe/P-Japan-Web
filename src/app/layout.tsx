@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { GlobalDrawer } from "@/components/global-drawer";
 
 export const metadata: Metadata = {
   title: "Japan Politics Daily Brief",
@@ -23,6 +24,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+
           <SidebarProvider>
             <AppSidebar />
             <SidebarInset className="md:ml-[16rem] transition-[margin] bg-background">
@@ -33,6 +35,7 @@ export default function RootLayout({
                 {children}
               </main>
             </SidebarInset>
+            <GlobalDrawer />
           </SidebarProvider>
         </ThemeProvider>
       </body>

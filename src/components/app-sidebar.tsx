@@ -49,7 +49,21 @@ const items = [
     },
 ];
 
+import { useDrawerActions } from "@/store/use-global-drawer";
+
 export function AppSidebar() {
+    const { open } = useDrawerActions();
+
+    const handleManualUpdate = async () => {
+        // Optimistically open the drawer to show logs
+        open("LOGS");
+        try {
+            await fetch("/api/manual-update", { method: "POST" });
+        } catch (error) {
+            console.error("Failed to trigger update", error);
+        }
+    };
+
     return (
         <Sidebar variant="sidebar" collapsible="icon">
             <SidebarHeader className="border-b px-6 py-4">
@@ -57,7 +71,7 @@ export function AppSidebar() {
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-editorial-pink text-white">
                         <span className="font-serif text-xl font-bold italic">J</span>
                     </div>
-                    <span className="text-sm font-semibold tracking-tight text-foreground group-data-[collapsible=icon]:hidden">
+                    <span className="text-sm font-semibold text-foreground group-data-[collapsible=icon]:hidden">
                         日本政情簡報
                     </span>
                 </div>
@@ -67,16 +81,31 @@ export function AppSidebar() {
                     <SidebarGroupLabel className="px-6 group-data-[collapsible=icon]:hidden">Navigation</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {items.map((item) => (
-                                <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild tooltip={item.title}>
-                                        <a href={item.url} className="px-6 py-6 h-auto">
-                                            <item.icon className="scale-110" />
-                                            <span className="font-medium">{item.title}</span>
-                                        </a>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
+                            {items.map((item) => {
+                                if (item.url === '/manual-entry') {
+                                    return (
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton
+                                                tooltip={item.title}
+                                                onClick={handleManualUpdate}
+                                            >
+                                                <item.icon />
+                                                <span className="font-medium">{item.title}</span>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    );
+                                }
+                                return (
+                                    <SidebarMenuItem key={item.title}>
+                                        <SidebarMenuButton asChild tooltip={item.title}>
+                                            <a href={item.url} className="px-6 py-6 h-auto">
+                                                <item.icon className="scale-110" />
+                                                <span className="font-medium">{item.title}</span>
+                                            </a>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                );
+                            })}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>

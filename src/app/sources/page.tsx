@@ -62,7 +62,7 @@ export default function SourcesPage() {
         <div className="space-y-8">
             <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                    <h1 className="text-4xl font-bold tracking-tight text-foreground">情報來源管理</h1>
+                    <h1 className="text-4xl font-bold text-foreground">情報來源管理</h1>
                     <p className="text-muted-foreground">管理簡報系統的新聞來源與社群帳號名單。</p>
                 </div>
                 <div className="flex gap-4">

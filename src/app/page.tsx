@@ -41,7 +41,7 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">系統儀表板</h1>
+          <h1 className="text-4xl font-bold text-foreground">系統儀表板</h1>
           <p className="text-muted-foreground mt-1 text-lg">
             監控新聞蒐集系統與服務健康狀態。
           </p>
