@@ -74,30 +74,6 @@ export function AIFunctionCard({
                     )}
                 />
 
-                {/* 模型名稱 */}
-                <FormField
-                    control={form.control}
-                    name={`${fieldPrefix}.model` as any}
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>模型名稱</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder={
-                                        fieldPrefix === 'ai.embedding'
-                                            ? "例如：text-embedding-3-small"
-                                            : "例如：gpt-4o、gpt-4o-mini、doubao-seed-1-8-251228..."
-                                    }
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormDescription>
-                                輸入您要使用的 AI 模型名稱
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
             </CardContent>
         </Card>
     );

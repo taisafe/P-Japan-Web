@@ -45,17 +45,14 @@ const settingsSchema = z.object({
 
     // 翻譯功能
     "ai.translation.provider_id": z.string(),
-    "ai.translation.model": z.string(),
     "ai.translation.enabled": z.boolean(),
     "ai.translation.target_lang": z.string(),
 
     // 簡報功能
     "ai.briefing.provider_id": z.string(),
-    "ai.briefing.model": z.string(),
 
     // 向量嵌入功能
     "ai.embedding.provider_id": z.string(),
-    "ai.embedding.model": z.string(),
 
     // 內容抓取設定
     "fetch.rss_interval_minutes": z.number().min(5).max(1440),
@@ -84,17 +81,55 @@ export function SettingsForm({ initialValues, onSave }: SettingsFormProps) {
     const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
     const [providerToDelete, setProviderToDelete] = React.useState<string | null>(null);
 
+    // 使用獨立的 state 管理 providers，避免 react-hook-form 的 dot notation 問題
+    const [providers, setProviders] = React.useState<AIProviderConfig[]>(
+        initialValues['ai.providers'] as AIProviderConfig[] || []
+    );
+
     const form = useForm<SettingsFormValues>({
         resolver: zodResolver(settingsSchema),
         defaultValues: initialValues as SettingsFormValues,
     });
 
-    const providers = form.watch("ai.providers") || [];
+    // Helper to flatten nested objects back to dot notation
+    const flattenSettingsValues = (obj: any, prefix = ''): any => {
+        return Object.keys(obj).reduce((acc: any, key) => {
+            const pre = prefix.length ? prefix + '.' : '';
+            const value = obj[key];
 
-    const handleSubmit = async (values: SettingsFormValues) => {
+            // Special handling for arrays (like ai.providers) - keep them as is
+            if (Array.isArray(value)) {
+                acc[pre + key] = value;
+            } else if (typeof value === 'object' && value !== null && Object.keys(value).length > 0) {
+                // Recursively flatten objects
+                Object.assign(acc, flattenSettingsValues(value, pre + key));
+            } else {
+                // Primitive values
+                acc[pre + key] = value;
+            }
+            return acc;
+        }, {});
+    };
+
+    const handleSubmit = async () => {
         setIsLoading(true);
         try {
-            await onSave(values);
+            // Get all current values from the form
+            // note: react-hook-form return nested object structure for dot notation keys
+            const values = form.getValues();
+
+            // 合併 form values 和獨立管理的 providers state
+            const rawValues = {
+                ...values,
+                'ai.providers': providers,
+            };
+
+            // Flatten the nested values back to dot notation keys
+            // react-hook-form automatically nests keys with dots (e.g. "ai.translation.provider_id" -> { ai: { translation: { provider_id: ... } } })
+            // But our backend expects the flat dot-notation keys
+            const flatValues = flattenSettingsValues(rawValues);
+
+            await onSave(flatValues as SettingsFormValues);
         } finally {
             setIsLoading(false);
         }
@@ -117,10 +152,9 @@ export function SettingsForm({ initialValues, onSave }: SettingsFormProps) {
 
     const confirmDeleteProvider = () => {
         if (providerToDelete) {
-            const currentProviders = form.getValues("ai.providers") as AIProviderConfig[];
-            const newProviders = currentProviders.filter((p: AIProviderConfig) => p.id !== providerToDelete);
-            // @ts-expect-error - react-hook-form has issues with complex nested key types
-            form.setValue("ai.providers", newProviders);
+            // 使用獨立 state 管理 providers
+            const newProviders = providers.filter((p: AIProviderConfig) => p.id !== providerToDelete);
+            setProviders(newProviders);
 
             // Clear function references to deleted provider
             const fieldsToCheck = [
@@ -132,7 +166,7 @@ export function SettingsForm({ initialValues, onSave }: SettingsFormProps) {
             for (const field of fieldsToCheck) {
                 if (form.getValues(field) === providerToDelete) {
                     // @ts-expect-error - react-hook-form has issues with complex nested key types
-                    form.setValue(field, "");
+                    form.setValue(field, "", { shouldDirty: true });
                 }
             }
         }
@@ -141,18 +175,17 @@ export function SettingsForm({ initialValues, onSave }: SettingsFormProps) {
     };
 
     const handleSaveProvider = (provider: AIProviderConfig) => {
-        const currentProviders = form.getValues("ai.providers") as AIProviderConfig[];
-        const existingIndex = currentProviders.findIndex((p: AIProviderConfig) => p.id === provider.id);
+        const existingIndex = providers.findIndex((p: AIProviderConfig) => p.id === provider.id);
 
+        let newProviders: AIProviderConfig[];
         if (existingIndex >= 0) {
-            const newProviders = [...currentProviders];
+            newProviders = [...providers];
             newProviders[existingIndex] = provider;
-            // @ts-expect-error - react-hook-form has issues with complex nested key types
-            form.setValue("ai.providers", newProviders);
         } else {
-            // @ts-expect-error - react-hook-form has issues with complex nested key types
-            form.setValue("ai.providers", [...currentProviders, provider]);
+            newProviders = [...providers, provider];
         }
+
+        setProviders(newProviders);
     };
 
     return (

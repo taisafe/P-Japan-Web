@@ -29,17 +29,14 @@ export const SETTING_DEFAULTS = {
 
     // 翻譯功能 - 指向提供商 ID
     'ai.translation.provider_id': '',
-    'ai.translation.model': '',
     'ai.translation.enabled': true,
     'ai.translation.target_lang': 'zh-CN',
 
     // 簡報功能 - 指向提供商 ID
     'ai.briefing.provider_id': '',
-    'ai.briefing.model': '',
 
     // 向量嵌入功能 - 指向提供商 ID
     'ai.embedding.provider_id': '',
-    'ai.embedding.model': '',
 
     // 內容抓取設定
     'fetch.rss_interval_minutes': 30,
