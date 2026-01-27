@@ -5,9 +5,8 @@ import { Plus, Pencil, Trash2, Server } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
-import { AIProviderConfig, AI_PROVIDER_PRESETS } from "@/lib/constants/settings";
+import { AIProviderConfig } from "@/lib/constants/settings";
 
 interface ProviderListProps {
     providers: AIProviderConfig[];
@@ -57,12 +56,7 @@ export function ProviderList({ providers, onAdd, onEdit, onDelete }: ProviderLis
                             >
                                 <div className="flex items-center gap-3">
                                     <div className="flex flex-col">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium">{provider.name}</span>
-                                            <Badge variant="secondary">
-                                                {AI_PROVIDER_PRESETS[provider.type]?.name || provider.type}
-                                            </Badge>
-                                        </div>
+                                        <span className="font-medium">{provider.name}</span>
                                         <span className="text-sm text-muted-foreground">
                                             {provider.baseUrl || '(未設定 URL)'}
                                         </span>

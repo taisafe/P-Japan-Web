@@ -34,7 +34,6 @@ import { ProviderDialog } from "./provider-dialog";
 const providerConfigSchema = z.object({
     id: z.string(),
     name: z.string(),
-    type: z.enum(['openai', 'volcengine', 'custom']),
     baseUrl: z.string(),
     apiKey: z.string(),
 });

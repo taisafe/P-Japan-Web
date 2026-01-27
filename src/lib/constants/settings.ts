@@ -1,12 +1,7 @@
 /**
- * AI 提供商預設配置
+ * AI 提供商配置
  * 此檔案不包含任何伺服器端依賴，可在客戶端元件中安全使用
  */
-
-/**
- * AI 提供商類型
- */
-export type AIProviderType = 'openai' | 'volcengine' | 'custom';
 
 /**
  * AI 提供商配置
@@ -14,32 +9,9 @@ export type AIProviderType = 'openai' | 'volcengine' | 'custom';
 export interface AIProviderConfig {
     id: string;
     name: string;
-    type: AIProviderType;
     baseUrl: string;
     apiKey: string;
 }
-
-/**
- * 預設提供商類型配置 (用於自動填充 Base URL)
- */
-export const AI_PROVIDER_PRESETS: Record<AIProviderType, { name: string; baseUrl: string }> = {
-    openai: {
-        name: 'OpenAI',
-        baseUrl: 'https://api.openai.com/v1',
-    },
-    volcengine: {
-        name: '火山方舟',
-        baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
-    },
-    custom: {
-        name: '自訂',
-        baseUrl: '',
-    },
-};
-
-// 向後兼容：保留舊的 AI_PROVIDERS 名稱
-export const AI_PROVIDERS = AI_PROVIDER_PRESETS;
-export type AIProvider = AIProviderType;
 
 /**
  * AI 功能用途類型

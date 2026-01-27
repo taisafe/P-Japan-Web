@@ -14,9 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import { AIProviderConfig, AIProviderType, AI_PROVIDER_PRESETS } from "@/lib/constants/settings";
+import { AIProviderConfig } from "@/lib/constants/settings";
 
 interface ProviderDialogProps {
     open: boolean;
@@ -27,7 +26,6 @@ interface ProviderDialogProps {
 
 export function ProviderDialog({ open, onOpenChange, provider, onSave }: ProviderDialogProps) {
     const [name, setName] = React.useState("");
-    const [type, setType] = React.useState<AIProviderType>("openai");
     const [baseUrl, setBaseUrl] = React.useState("");
     const [apiKey, setApiKey] = React.useState("");
     const [showApiKey, setShowApiKey] = React.useState(false);
@@ -39,34 +37,21 @@ export function ProviderDialog({ open, onOpenChange, provider, onSave }: Provide
         if (open) {
             if (provider) {
                 setName(provider.name);
-                setType(provider.type);
                 setBaseUrl(provider.baseUrl);
                 setApiKey(provider.apiKey);
             } else {
                 setName("");
-                setType("openai");
-                setBaseUrl(AI_PROVIDER_PRESETS.openai.baseUrl);
+                setBaseUrl("");
                 setApiKey("");
             }
             setShowApiKey(false);
         }
     }, [open, provider]);
 
-    // Auto-fill baseUrl when type changes (only for new providers or when type changes)
-    const handleTypeChange = (newType: AIProviderType) => {
-        setType(newType);
-        if (newType !== "custom") {
-            setBaseUrl(AI_PROVIDER_PRESETS[newType].baseUrl);
-        } else {
-            setBaseUrl("");
-        }
-    };
-
     const handleSave = () => {
         const newProvider: AIProviderConfig = {
             id: provider?.id || crypto.randomUUID(),
-            name: name.trim() || AI_PROVIDER_PRESETS[type].name,
-            type,
+            name: name.trim() || "自訂提供商",
             baseUrl,
             apiKey,
         };
@@ -74,7 +59,7 @@ export function ProviderDialog({ open, onOpenChange, provider, onSave }: Provide
         onOpenChange(false);
     };
 
-    const isValid = apiKey.trim().length > 0 && (type !== "custom" || baseUrl.trim().length > 0);
+    const isValid = name.trim().length > 0 && baseUrl.trim().length > 0 && apiKey.trim().length > 0;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -89,34 +74,17 @@ export function ProviderDialog({ open, onOpenChange, provider, onSave }: Provide
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
-                    {/* Provider Type */}
-                    <div className="grid gap-2">
-                        <Label htmlFor="type">提供商類型</Label>
-                        <Select value={type} onValueChange={(v) => handleTypeChange(v as AIProviderType)}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="選擇類型" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {Object.entries(AI_PROVIDER_PRESETS).map(([key, preset]) => (
-                                    <SelectItem key={key} value={key}>
-                                        {preset.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* Custom Name */}
+                    {/* Display Name */}
                     <div className="grid gap-2">
                         <Label htmlFor="name">顯示名稱</Label>
                         <Input
                             id="name"
-                            placeholder={AI_PROVIDER_PRESETS[type].name}
+                            placeholder="例如：OpenAI、DeepSeek、Claude..."
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                         />
                         <p className="text-xs text-muted-foreground">
-                            可選，用於區分同類型的多個配置
+                            用於識別此提供商配置
                         </p>
                     </div>
 
@@ -125,16 +93,13 @@ export function ProviderDialog({ open, onOpenChange, provider, onSave }: Provide
                         <Label htmlFor="baseUrl">Base URL</Label>
                         <Input
                             id="baseUrl"
-                            placeholder="https://api.example.com/v1"
+                            placeholder="https://api.openai.com/v1"
                             value={baseUrl}
                             onChange={(e) => setBaseUrl(e.target.value)}
-                            disabled={type !== "custom"}
                         />
-                        {type !== "custom" && (
-                            <p className="text-xs text-muted-foreground">
-                                使用預設 URL：{AI_PROVIDER_PRESETS[type].baseUrl}
-                            </p>
-                        )}
+                        <p className="text-xs text-muted-foreground">
+                            API 端點 URL（支援 OpenAI 相容格式）
+                        </p>
                     </div>
 
                     {/* API Key */}

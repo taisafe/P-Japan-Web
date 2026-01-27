@@ -1,11 +1,11 @@
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { systemSettings } from '@/lib/db/schema';
-import { SETTING_DEFAULTS, SettingKey, AI_PROVIDERS, AIProvider, SettingsValues } from '@/lib/constants/settings';
+import { SETTING_DEFAULTS, SettingKey, SettingsValues, AIProviderConfig } from '@/lib/constants/settings';
 
 // Re-export constants for backward compatibility
-export { SETTING_DEFAULTS, AI_PROVIDERS };
-export type { SettingKey, AIProvider };
+export { SETTING_DEFAULTS };
+export type { SettingKey, AIProviderConfig };
 
 /**
  * 取得單一設定值

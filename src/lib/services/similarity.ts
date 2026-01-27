@@ -1,8 +1,4 @@
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || 'dummy',
-});
+import { getAIClient } from '@/lib/services/ai-client';
 
 function cosineSimilarity(vecA: number[], vecB: number[]): number {
     const dotProduct = vecA.reduce((acc, val, i) => acc + val * vecB[i], 0);
@@ -16,8 +12,11 @@ export async function calculateSimilarity(textA: string, textB: string): Promise
     if (!textA || !textB) return 0;
 
     try {
-        const response = await openai.embeddings.create({
-            model: "text-embedding-3-small",
+        // 使用集中式提供商系統取得 Embedding 客戶端
+        const { client, model } = await getAIClient('embedding');
+
+        const response = await client.embeddings.create({
+            model: model,
             input: [textA, textB],
         });
 
