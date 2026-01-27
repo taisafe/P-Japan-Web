@@ -41,7 +41,7 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-4xl font-bold tracking-tight italic">系統儀表板</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">系統儀表板</h1>
           <p className="text-muted-foreground mt-1 text-lg">
             監控新聞蒐集系統與服務健康狀態。
           </p>
@@ -57,33 +57,33 @@ export default async function DashboardPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card className="border-l-4 border-l-editorial-pink shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               總情報來源
             </CardTitle>
             <Database className="h-4 w-4 text-editorial-pink" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.sources}</div>
-            <p className="text-xs text-muted-foreground mt-1 font-medium">已配置的日文/英文媒體</p>
+            <p className="text-xs text-muted-foreground mt-1 text-nowrap">已配置的日文/英文媒體</p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-editorial-pink shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               已收錄文章
             </CardTitle>
             <FileText className="h-4 w-4 text-editorial-pink" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.articles}</div>
-            <p className="text-xs text-muted-foreground mt-1 font-medium">資料庫中的處理條目</p>
+            <p className="text-xs text-muted-foreground mt-1 text-nowrap">資料庫中的處理條目</p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-green-500 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               上次抓取執行
             </CardTitle>
             <Zap className="h-4 w-4 text-green-500" />
@@ -92,7 +92,7 @@ export default async function DashboardPage() {
             <div className="text-lg font-bold truncate">
               {stats.lastRun?.status === "completed" ? "執行成功" : stats.lastRun?.status || "尚未執行"}
             </div>
-            <p className="text-xs text-muted-foreground mt-1 font-medium">
+            <p className="text-xs text-muted-foreground mt-1">
               {stats.lastRun?.completedAt ? new Date(stats.lastRun.completedAt).toLocaleString('zh-TW') : "---"}
             </p>
           </CardContent>
@@ -100,20 +100,20 @@ export default async function DashboardPage() {
 
         <Card className="border-l-4 border-l-blue-500 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               自動簡報生成
             </CardTitle>
             <CheckCircle2 className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">待機中</div>
-            <p className="text-xs text-muted-foreground mt-1 font-medium">抓取完成後自動觸發</p>
+            <p className="text-xs text-muted-foreground mt-1">抓取完成後自動觸發</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="rounded-xl border bg-muted/30 p-8 text-center border-dashed">
-        <h3 className="text-lg font-serif italic text-muted-foreground">
+        <h3 className="text-lg font-medium text-muted-foreground">
           準備開始收集情報。前往「手動錄入」注入第一筆信號，或前往「情報來源」管理監測名單。
         </h3>
       </div>

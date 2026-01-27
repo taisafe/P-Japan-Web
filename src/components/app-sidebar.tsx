@@ -57,7 +57,7 @@ export function AppSidebar() {
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-editorial-pink text-white">
                         <span className="font-serif text-xl font-bold italic">J</span>
                     </div>
-                    <span className="font-serif text-sm font-semibold italic tracking-tight group-data-[collapsible=icon]:hidden">
+                    <span className="text-sm font-semibold tracking-tight text-foreground group-data-[collapsible=icon]:hidden">
                         日本政情簡報
                     </span>
                 </div>

@@ -77,7 +77,7 @@ export default function ManualEntryPage() {
                         <ArrowLeft className="h-6 w-6" />
                     </Link>
                 </Button>
-                <h1 className="font-serif text-4xl font-bold tracking-tight italic">手動情報錄入</h1>
+                <h1 className="text-4xl font-bold tracking-tight text-foreground">手動情報錄入</h1>
             </div>
 
             <Form {...form}>
@@ -86,7 +86,7 @@ export default function ManualEntryPage() {
                         <div className="space-y-8">
                             <Card className="border-t-4 border-t-editorial-pink shadow-lg">
                                 <CardHeader>
-                                    <CardTitle className="font-serif italic text-2xl">文章 / 推文內容</CardTitle>
+                                    <CardTitle className="text-2xl font-semibold">文章 / 推文內容</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     <FormField
@@ -94,9 +94,9 @@ export default function ManualEntryPage() {
                                         name="title"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">標題 / 主旨</FormLabel>
+                                                <FormLabel className="font-bold text-xs text-muted-foreground">標題 / 主旨</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="輸入簡短的摘要標題..." className="font-serif italic text-xl border-none bg-muted/20 focus-visible:ring-0 px-0 h-auto" {...field} />
+                                                    <Input placeholder="輸入簡短的摘要標題..." className="text-xl border-none bg-muted/20 focus-visible:ring-0 px-0 h-auto font-medium" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -108,11 +108,11 @@ export default function ManualEntryPage() {
                                         name="content"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="font-bold uppercase tracking-wider text-xs text-muted-foreground">內容全文</FormLabel>
+                                                <FormLabel className="font-bold text-xs text-muted-foreground">內容全文</FormLabel>
                                                 <FormControl>
                                                     <Textarea
                                                         placeholder="在此貼上推文全文或文章內容..."
-                                                        className="min-h-[400px] font-sans text-lg leading-relaxed border-none bg-muted/10 focus-visible:ring-0 px-0 resize-none"
+                                                        className="min-h-[400px] text-lg leading-relaxed border-none bg-muted/10 focus-visible:ring-0 px-0 resize-none font-sans"
                                                         {...field}
                                                     />
                                                 </FormControl>
@@ -188,7 +188,7 @@ export default function ManualEntryPage() {
                                     />
 
                                     <div className="pt-4">
-                                        <Button type="submit" className="w-full bg-editorial-pink hover:bg-editorial-pink/90 h-12 text-lg font-serif italic">
+                                        <Button type="submit" className="w-full bg-editorial-pink hover:bg-editorial-pink/90 h-12 text-lg font-medium">
                                             <Send className="mr-2 h-5 w-5" />
                                             發布至簡報系統
                                         </Button>
@@ -196,7 +196,7 @@ export default function ManualEntryPage() {
                                 </CardContent>
                             </Card>
 
-                            <div className="p-4 rounded-lg bg-muted/50 border border-dashed border-muted-foreground/30 text-sm text-muted-foreground italic">
+                            <div className="p-4 rounded-lg bg-muted/50 border border-dashed border-muted-foreground/30 text-sm text-muted-foreground">
                                 注意：手動錄入的資料將繞過自動評分緩衝區，預設被視為已驗證的高優先級信號。
                             </div>
                         </aside>
