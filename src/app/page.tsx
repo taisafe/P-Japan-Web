@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Database, Zap, FileText, CheckCircle2 } from "lucide-react";
-import { EventFeed } from "@/components/events/event-feed";
+
 import { MergeReview } from "@/components/events/merge-review";
 
 async function getStats() {
@@ -115,7 +115,7 @@ export default async function DashboardPage() {
 
       <MergeReview />
 
-      <EventFeed />
+
     </div>
   );
 }

@@ -59,3 +59,8 @@ export async function translateContent(articleId: string) {
     await translationService.translateArticle(articleId);
     revalidatePath(`/updates/${articleId}`);
 }
+
+export async function deleteArticle(articleId: string) {
+    await articlesService.delete(articleId);
+    revalidatePath("/updates");
+}

@@ -8,7 +8,7 @@ export type Article = typeof articles.$inferSelect;
 
 export class ArticlesService {
 
-    async list(params: { page?: number; limit?: number; query?: string; sourceId?: string }) {
+    async list(params: { page?: number; limit?: number; query?: string; sourceId?: string; date?: string }) {
         const page = params.page || 1;
         const limit = params.limit || 20;
         const offset = (page - 1) * limit;
@@ -25,6 +25,23 @@ export class ArticlesService {
 
         if (params.sourceId) {
             conditions.push(eq(articles.sourceId, params.sourceId));
+        }
+
+        if (params.date) {
+            // Filter by date (YYYY-MM-DD)
+            // SQLite stores dates as timestamps (milliseconds) or strings depending on configuration.
+            // Based on schema, it is integer (timestamp).
+            // We need to match the range for that day.
+            const dateStart = new Date(params.date);
+            dateStart.setHours(0, 0, 0, 0);
+
+            const dateEnd = new Date(params.date);
+            dateEnd.setHours(23, 59, 59, 999);
+
+            conditions.push(and(
+                sql`${articles.publishedAt} >= ${dateStart.getTime()}`,
+                sql`${articles.publishedAt} <= ${dateEnd.getTime()}`
+            ));
         }
 
         const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -104,5 +121,26 @@ export class ArticlesService {
                 eq(articlePeople.articleId, articleId),
                 eq(articlePeople.personId, personId)
             ));
+    }
+
+    async getAvailableDates() {
+        // Fetch distinct dates from publishedAt
+        // We need to group by date part of publishedAt
+        const result = await db.select({
+            date: sql<string>`date(${articles.publishedAt} / 1000, 'unixepoch', 'localtime')`
+        })
+            .from(articles)
+            .where(sql`${articles.publishedAt} IS NOT NULL`)
+            .groupBy(sql`date(${articles.publishedAt} / 1000, 'unixepoch', 'localtime')`)
+            .orderBy(desc(sql`date(${articles.publishedAt} / 1000, 'unixepoch', 'localtime')`));
+
+        return result.map(r => r.date).filter(Boolean);
+    }
+
+    async delete(id: string) {
+        // First delete related records to avoid foreign key constraint
+        await db.delete(articlePeople).where(eq(articlePeople.articleId, id));
+        // Then delete the article
+        await db.delete(articles).where(eq(articles.id, id));
     }
 }

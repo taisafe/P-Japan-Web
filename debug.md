@@ -317,3 +317,84 @@
 *   ✅ 若標題未自動翻譯，用戶可點擊「翻譯標題」單獨重試。
 *   ✅ 數據庫中不再存儲無效的空字串作為翻譯標題。
 
+
+---
+
+# 文章刪除功能導航錯誤與水合問題除錯紀錄 (Debug Log)
+
+## 1. 問題描述
+用戶報告在 `/updates` 頁面點擊文章的刪除按鈕時，系統沒有彈出刪除確認對話框，而是直接導航到了文章的詳情頁面。此外，開發者工具的控制台中出現了伺服器端渲染 (SSR) 與客戶端渲染不一致的水合 (Hydration) 錯誤。
+
+## 2. 導航問題分析與修復
+
+### 2.1 事件冒泡 (Event Bubbling)
+#### 排查過程 (Investigation)
+*   **觀察現象**：點擊位於文章卡片右上角的垃圾桶圖標，頁面跳轉至 `/updates/[id]`。
+*   **代碼審查**：發現 `ArticleActions` 組件被嵌套在 Next.js 的 `<Link>` 組件內部。
+    ```tsx
+    <Link href={`/updates/${article.id}`}>
+        <Card>
+            ...
+            <ArticleActions />
+            ...
+        </Card>
+    </Link>
+    ```
+*   **無效修復嘗試**：最初在 `ArticleActions` 的 `div` 和 `button` 上添加了 `e.stopPropagation()` 和 `e.preventDefault()`。
+*   **失效原因**：Next.js 的 `<Link>` 組件行為特殊，它可能監聽了捕獲階段 (Capture Phase) 事件，或者其 Prefetch 行為難以通過簡單的 `stopPropagation` 完全阻止。且在按鈕上使用 `preventDefault()` 意外阻止了 Radix UI `AlertDialogTrigger` 的正常開啟行為。
+
+### 2.2 架構性修復
+#### 解決方案 (Solution)
+*   **DOM 重構**：放棄在 Link 內部阻止事件的嘗試。將 `ArticleActions` 移出 `<Link>` 結構，並使用 CSS 絕對定位 (`absolute positioning`) 將其放置在卡片視覺上的右上角。
+*   **層級調整**：
+    ```tsx
+    <div className="relative group">
+        <div className="absolute top-4 right-4 z-10">
+            <ArticleActions />
+        </div>
+        <Link ...>
+            <Card>...</Card>
+        </Link>
+    </div>
+    ```
+*   **移除冗餘代碼**：由於不再嵌套，移除了 `ArticleActions` 中所有 `stopPropagation` 和 `preventDefault` 邏輯，恢復了 Radix UI 的默認交互行為。
+
+## 3. 外鍵約束 (Foreign Key Constraint) 錯誤
+
+### 3.1 問題描述
+修復 UI 互動後，點擊「確認刪除」後端報 `SqliteError: FOREIGN KEY constraint failed` (500 Internal Server Error)。
+
+### 3.2 原因分析
+*   **資料庫結構**：`article_people` 表包含指向 `articles.id` 的外鍵。
+*   **刪除邏輯缺失**：原有的 `delete(id)` 方法僅執行 `DELETE FROM articles WHERE id = ?`，未先清理關聯數據。
+
+### 3.3 解決方案
+在刪除文章前，先刪除關聯記錄 (Cascade Delete 手動實作)：
+```typescript
+async delete(id: string) {
+    // 先刪除關聯的人名標記記錄
+    await db.delete(articlePeople).where(eq(articlePeople.articleId, id));
+    // 再刪除文章本體
+    await db.delete(articles).where(eq(articles.id, id));
+}
+```
+
+## 4. 水合錯誤 (Hydration Mismatch)
+
+### 4.1 日期格式不一致
+*   **錯誤訊息**：`Text content does not match server-rendered HTML.` (Server: "1/28/2026", Client: "2026/1/28")
+*   **原因**：使用了 `new Date().toLocaleDateString()` 但未指定 locale。伺服器 (Node.js) 和瀏覽器的默認 locale 不同。
+*   **修復**：顯式指定 locale，統一使用 `'zh-TW'`：
+    ```tsx
+    new Date(article.publishedAt).toLocaleDateString('zh-TW')
+    ```
+
+### 4.2 Radix UI ID 隨機性
+*   **錯誤訊息**：`Prop aria-controls did not match.`
+*   **原因**：Radix UI 的 Dialog/Sheet 組件在 SSR 和 Client 端生成了不同的隨機 ID。
+*   **處理**：這通常是開發環境警告，不影響生產環境功能，暫時忽略或可使用 `suppressHydrationWarning`。
+
+## 5. 驗證結果
+*   ✅ **導航阻斷**：點擊刪除按鈕不再誤觸發文章跳轉。
+*   ✅ **對話框功能**：刪除確認視窗正常彈出。
+*   ✅ **數據完整性**：文章及其關聯數據能被成功物理刪除，且不會引發資料庫錯誤。

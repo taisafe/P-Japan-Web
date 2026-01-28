@@ -156,7 +156,7 @@ export function ReaderView({ article }: ReaderViewProps) {
                     <div className="flex flex-col overflow-hidden">
                         <h1 className="text-sm font-semibold truncate" title={displayTitle}>{displayTitle}</h1>
                         <span className="text-xs text-muted-foreground flex items-center gap-2">
-                            {article.source?.name} · {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString() : 'Unknown Date'}
+                            {article.source?.name} · {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('zh-TW') : 'Unknown Date'}
                         </span>
                     </div>
                 </div>

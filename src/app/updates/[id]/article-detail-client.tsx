@@ -164,7 +164,7 @@ export function ArticleDetailClient({ article }: ArticleDetailProps) {
                             <h2 className="text-2xl font-serif font-bold mb-2">{article.title}</h2>
                             <div className="text-sm text-muted-foreground flex gap-4">
                                 <span>Source: {article.source?.name}</span>
-                                <span>{new Date(article.publishedAt).toLocaleDateString()}</span>
+                                <span>{new Date(article.publishedAt).toLocaleDateString('zh-TW')}</span>
                             </div>
                         </div>
                         <article className="prose dark:prose-invert prose-stone max-w-none text-base leading-relaxed whitespace-pre-wrap font-serif">
