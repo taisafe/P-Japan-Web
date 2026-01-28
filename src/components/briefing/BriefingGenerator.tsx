@@ -11,6 +11,7 @@ import { Loader2, Copy, Check, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getBriefingCandidatesAction, generateBriefingAction } from '@/app/actions/briefing';
 import type { BriefingCandidate } from '@/lib/services/briefing';
+import { useGlobalModal } from '@/components/providers/global-modal-provider';
 
 
 export function BriefingGenerator() {
@@ -20,6 +21,7 @@ export function BriefingGenerator() {
     const [generating, setGenerating] = useState(false);
     const [result, setResult] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
+    const modal = useGlobalModal();
 
     useEffect(() => {
         loadCandidates();
@@ -57,7 +59,7 @@ export function BriefingGenerator() {
             setResult(res.content);
         } else {
             console.error(res.error);
-            alert('Generation failed: ' + res.error);
+            modal.alert('產生簡報失敗: ' + res.error);
         }
         setGenerating(false);
     };

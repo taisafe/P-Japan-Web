@@ -175,3 +175,47 @@
 ## 3. 驗證結果
 *   手動錄入不再報錯，重複 URL 會提示警告。
 *   點擊翻譯後，正文與標題皆正確轉換為簡體中文，並即時更新於 UI。
+
+---
+
+# 全局彈窗 UI 化與 Build 型別錯誤修復紀錄 (Debug Log)
+
+## 1. 全局彈窗 UI 化 (Global Modal Replacement)
+
+### 1.1 問題描述
+系統原先使用瀏覽器的原生 `alert()` 和 `confirm()`，導致 UI/UX 不一致且風格與現代 Web 應用的 shadcn/ui 設計不搭。用戶要求全面替換為自定義 UI 彈窗。
+
+### 1.2 解決方案
+*   **實作 `GlobalModalProvider`**：
+    *   利用 `shadcn/ui` 的 `AlertDialog` 元件作為基礎。
+    *   透過 React Context 管理彈窗狀態（標題、訊息、類型）。
+    *   使用 `Promise` 與 `useRef` 儲存 resolver，模擬 `await modal.confirm()` 的同步阻塞感。
+*   **封裝 `useGlobalModal` Hook**：
+    *   提供 `alert(msg)` 和 `confirm(msg)` 接口，回傳 Promise 以支援非同步流程。
+*   **全局集成**：
+    *   在 `src/app/layout.tsx` 中將 `GlobalModalProvider` 包裹在最外層。
+*   **程式碼重構**：
+    *   掃描全專案，將 `window.confirm()` 和 `window.alert()` 替換為 `modal.confirm()` 與 `modal.alert()`。
+
+---
+
+## 2. Build 過程中的型別錯誤修復 (Type Error Fix)
+
+### 2.1 問題描述
+在完成 Modal 替換後執行 `npm run build`，發現 `src/app/updates/page.tsx` 報錯：
+`Type 'unknown' is not assignable to type 'ReactNode'`.
+這是一個既有的型別遺留問題，出現在渲染文章標籤 (tags) 的邏輯位置。
+
+### 2.2 原因分析
+*   資料庫中 `articles.tags` 欄位被定義為 `unknown`（可能是由 Drizzle 的 JSON 欄位推斷而來）。
+*   在 JSX 中直接使用 `{article.tags && ...}` 時，React 無法確定 `article.tags`（型別為 `unknown`）是否為合法的渲染對象，導致 TS 報錯。
+
+### 2.3 解決方案
+*   使用 **IIFE (立即調用表達式)** 模式封裝渲染邏輯。
+*   加入顯式的 **Type Guard** 檢查：`if (!tags || !Array.isArray(tags) || tags.length === 0)`。
+*   使用 **顯式型別斷言 (Type Assertion)**：`(tags as string[]).map(...)`，確保 TS 知道正在處理的是字串陣列。
+
+## 3. 驗證結果
+*   ✅ 全局掃描確認無 `alert/confirm` 殘留。
+*   ✅ `npm run build` 成功通過。
+*   ✅ UI 文字確認為繁體中文，按鈕文字與邏輯正確。

@@ -64,16 +64,19 @@ export default async function UpdatesPage({
                                                 </span>
                                             </div>
 
-                                            {article.tags && (
-                                                <div className="flex flex-wrap gap-2 pt-1">
-                                                    {/* Need to parse tags if it's a string, Drizzle mode:'json' gives object/array but we should verify */}
-                                                    {Array.isArray(article.tags) && article.tags.map((tag: string) => (
-                                                        <Badge key={tag} variant="outline" className="text-xs text-editorial-pink border-editorial-pink/30">
-                                                            #{tag}
-                                                        </Badge>
-                                                    ))}
-                                                </div>
-                                            )}
+                                            {(() => {
+                                                const tags = article.tags;
+                                                if (!tags || !Array.isArray(tags) || tags.length === 0) return null;
+                                                return (
+                                                    <div className="flex flex-wrap gap-2 pt-1">
+                                                        {(tags as string[]).map((tag) => (
+                                                            <Badge key={tag} variant="outline" className="text-xs text-editorial-pink border-editorial-pink/30">
+                                                                #{tag}
+                                                            </Badge>
+                                                        ))}
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
 
                                         {article.source?.type === 'twitter' && (

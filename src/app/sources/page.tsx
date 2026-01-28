@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import { useGlobalModal } from "@/components/providers/global-modal-provider";
 
 interface NewsSource {
     id: string;
@@ -32,6 +33,7 @@ export default function SourcesPage() {
     const [sources, setSources] = useState<NewsSource[]>([]);
     const [loading, setLoading] = useState(true);
     const [isFetching, setIsFetching] = useState(false);
+    const modal = useGlobalModal();
 
     const fetchSources = async () => {
         setLoading(true);
@@ -77,7 +79,8 @@ export default function SourcesPage() {
     };
 
     const deleteSource = async (id: string) => {
-        if (!confirm("確定要刪除這個來源嗎？")) return;
+        const confirmed = await modal.confirm("確定要刪除這個來源嗎？");
+        if (!confirmed) return;
 
         try {
             const res = await fetch(`/api/sources/${id}`, { method: "DELETE" });
