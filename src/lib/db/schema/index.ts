@@ -20,6 +20,7 @@ export const sources = sqliteTable('sources', {
     weight: real('weight').default(1.0),
     isActive: integer('is_active', { mode: 'boolean' }).default(true),
     lastFetchedAt: integer('last_fetched_at', { mode: 'timestamp' }),
+    deletedAt: integer('deleted_at', { mode: 'timestamp' }),
     createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
 });
 
@@ -41,6 +42,7 @@ export const articles = sqliteTable('articles', {
     matchConfidence: real('match_confidence'),
     matchStatus: text('match_status', { enum: ['confirmed', 'pending', 'rejected'] }),
     isPaywalled: integer('is_paywalled', { mode: 'boolean' }).default(false),
+    status: text('status', { enum: ['candidate', 'published', 'rejected'] }).default('published'),
     createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
 });
 

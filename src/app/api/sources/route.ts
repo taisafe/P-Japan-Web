@@ -2,10 +2,13 @@ import { db } from "@/lib/db";
 import { sources } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
+import { isNull } from "drizzle-orm";
 
 export async function GET() {
     try {
-        const allSources = await db.select().from(sources);
+        const allSources = await db.select()
+            .from(sources)
+            .where(isNull(sources.deletedAt));
         return NextResponse.json(allSources);
     } catch (error) {
         return NextResponse.json({ error: "Failed to fetch sources" }, { status: 500 });

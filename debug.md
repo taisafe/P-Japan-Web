@@ -11,7 +11,7 @@
 
 #### 排查過程
 *   **追蹤數據流**：在 `saveSettingsAction` 和 `handleSubmit` 加入 Log，發現提交時 `ai.providers` 始終為空陣列 `[]`。
-*   **檢查表單狀態**：雖然在 `handleSaveProvider` 中使用了 `form.setValue` 並且設置了 `shouldDirty: true`，但在 `handleSubmit` 觸發時，`react-hook-form` 內部的狀態似乎被重置或未能正確追蹤此陣列欄位。
+*   **檢查表單狀態**：雖然在 `handleSaveProvider` 中使用了 `form.setValue` 並且設置了 `shouldDirty: true`，但在 `handleSubmit` 觸發時， `react-hook-form` 內部的狀態似乎被重置或未能正確追蹤此陣列欄位。
 *   **嘗試修復 (無效)**：嘗試添加隱藏的 `<input>` 欄位以強制註冊，但無效。
 
 #### 根本原因
@@ -219,3 +219,56 @@
 *   ✅ 全局掃描確認無 `alert/confirm` 殘留。
 *   ✅ `npm run build` 成功通過。
 *   ✅ UI 文字確認為繁體中文，按鈕文字與邏輯正確。
+
+---
+
+# 情報來源管理修復與優化紀錄 (Debug Log)
+
+## 1. 新增來源後無法獲取新聞 (RSS 0 Candidates)
+
+### 1.1 問題描述
+用戶反映剛新增的資訊來源（如 Newsweek Japan），其 RSS `https://www.newsweekjapan.jp/rss.xml` 在手動抓取時顯示成功但抓取數量為 0。
+
+### 1.2 原因分析
+*   **瀏覽器模式限制**：系統預設使用 Puppeteer 瀏覽器訪問所有 URL。對於直接返回 XML 內容的 RSS Feed，瀏覽器可能會將其渲染為預覽頁面或 XML 樹狀圖，導致基於 CSS Selector 的爬蟲無法正確提取連結。
+*   **選擇器失效**：針對 HTML 頁面設計的通用提取邏輯（尋找 `a` 標籤）對 XML 結構無效。
+
+### 1.3 解決方案
+*   **引入 `rss-parser`**：在 `browser.ts` 中加入預處理邏輯。
+*   **智慧判斷**：抓取前檢查 URL 特徵（結尾為 `.xml`, `.rss` 或包含 `/feed`）。
+*   **分流處理**：如果是 RSS Feed，直接使用 parser 解析 XML 結構提取連結；否則才啟動 Puppeteer 瀏覽器。
+*   **效能優化**：此改動同時大幅提升了 RSS來源的抓取速度，因為無需啟動瀏覽器實例。
+
+## 2. 來源刪除失敗 (Source Deletion Failure)
+
+### 2.1 問題描述
+用戶點擊刪除來源按鈕後，UI 無錯誤提示，但刷新頁面後該來源仍然存在。
+
+### 2.2 原因分析
+*   **外鍵約束 (Foreign Key Constraint)**：`sources` 表是 `articles` 表的父表。當該來源已有已抓取的新聞文章時，資料庫阻止直接刪除 `source` 記錄以維護資料完整性。
+*   **錯誤處理不足**：前端 `deleteSource` 只檢查了 HTTP 200，但未詳細處理 500 錯誤回應，導致失敗時無感。
+
+### 2.3 解決方案：軟刪除 (Soft Delete)
+為保留歷史新聞數據（用戶不希望刪除來源就把相關新聞也刪光），採用「軟刪除」策略：
+1.  **Schema 變更**：在 `sources` 表新增 `deletedAt` (TimeStamp) 欄位。
+2.  **API 調整**：
+    *   `DELETE` 請求不再執行 SQL `DELETE`，而是更新 `deletedAt = NOW()` 並設 `isActive = false`。
+    *   `GET` 請求自動過濾掉 `deletedAt IS NOT NULL` 的記錄。
+3.  **效果**：來源從列表中消失，但其關聯的歷史文章仍可被查詢和保留。
+
+## 3. 來源編輯功能 (Edit Source)
+
+### 3.1 問題描述
+用戶輸入錯誤的 URL 後，系統僅提供「刪除」功能，缺乏「編輯」功能，導致必須刪除重建，體驗不佳。
+
+### 3.2 解決方案
+*   **新增 PATCH API**：實作 `PATCH /api/sources/[id]` 接口，允許局部更新來源資訊。
+*   **實作編輯彈窗**：
+    *   新增 `EditSourceDialog` 元件，復用新增來源的表單邏輯。
+    *   在列表新增「編輯」按鈕 (筆型圖示)。
+    *   支援即時修改名稱、URL、類型、分類與權重。
+
+## 4. 驗證結果
+*   ✅ RSS Feed 可正常抓取到新聞。
+*   ✅ 刪除來源成功隱藏，且不影響舊有文章。
+*   ✅ 可直接修正錯誤的 URL，無需重建來源。
