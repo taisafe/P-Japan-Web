@@ -61,28 +61,52 @@ export class TranslationService {
                 temperature: 0.3, // Lower temperature for more deterministic translation
             });
 
-            const translatedText = completion.choices[0]?.message?.content?.trim();
+            let translatedText = completion.choices[0]?.message?.content?.trim();
 
             if (!translatedText) {
                 return { success: false, error: 'Empty response from AI' };
             }
 
-            // Parallel execution for content and title if needed
+            // Try to extract title from the translated content if it starts with a markdown heading
+            let extractedTitle: string | null = null;
+            const lines = translatedText.split('\n');
+            if (lines[0]?.trim().startsWith('#')) {
+                // Extract the heading text (removing # and whitespace)
+                extractedTitle = lines[0].trim().replace(/^#+\s*/, '').trim();
+                // Remove the heading line from the content to avoid duplication
+                translatedText = lines.slice(1).join('\n').trim();
+            }
+
+            // Determine title translation
             let newTitleCN = article.titleCN;
             if (!newTitleCN) {
-                try {
-                    newTitleCN = await this.translateTitle(article.title);
-                } catch (err) {
-                    console.warn('Title translation failed during article translation:', err);
+                // First, try to use the extracted title from the content
+                if (extractedTitle) {
+                    newTitleCN = extractedTitle;
+                    console.log('Title extracted from content:', extractedTitle);
+                } else {
+                    // Fallback to separate title translation call
+                    try {
+                        const translatedTitle = await this.translateTitle(article.title);
+                        if (translatedTitle && translatedTitle.trim()) {
+                            newTitleCN = translatedTitle;
+                        }
+                    } catch (err) {
+                        console.warn('Title translation failed during article translation:', err);
+                    }
                 }
             }
 
-            // 6. Save to DB
+            // 6. Save to DB - only include titleCN if we have a valid value
+            const updateData: { contentCN: string; titleCN?: string } = {
+                contentCN: translatedText,
+            };
+            if (newTitleCN && newTitleCN.trim()) {
+                updateData.titleCN = newTitleCN;
+            }
+
             await db.update(articles)
-                .set({
-                    contentCN: translatedText,
-                    titleCN: newTitleCN
-                })
+                .set(updateData)
                 .where(eq(articles.id, articleId));
 
             return { success: true, translatedText, titleCN: newTitleCN || undefined };
@@ -99,8 +123,8 @@ export class TranslationService {
         try {
             const { client, model } = await getAIClient('translation');
 
-            // Add 15s timeout
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Translation Timeout")), 15000));
+            // Add 30s timeout (increased from 15s to match content translation)
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Translation Timeout")), 30000));
 
             const completionPromise = client.chat.completions.create({
                 messages: [

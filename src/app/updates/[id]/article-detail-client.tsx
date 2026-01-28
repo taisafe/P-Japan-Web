@@ -70,7 +70,7 @@ export function ArticleDetailClient({ article }: ArticleDetailProps) {
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    {!article.contentCN && (
+                    {(!article.contentCN || !article.titleCN) && (
                         <Button
                             variant="secondary"
                             size="sm"
@@ -79,7 +79,7 @@ export function ArticleDetailClient({ article }: ArticleDetailProps) {
                             className="bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300"
                         >
                             <Globe className={`mr-2 h-3.5 w-3.5 ${isTranslating ? 'animate-spin' : ''}`} />
-                            翻譯全文
+                            {article.contentCN ? '翻譯標題' : '翻譯全文'}
                         </Button>
                     )}
                     <Button
