@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/lib/logger';
 import { translationService } from '@/lib/services/translator';
 import { extractFromHtml } from './extractor';
+import { blacklistService } from '@/lib/services/blacklist';
 
 export interface NewsCandidate {
     title: string;
@@ -217,6 +218,17 @@ export async function fetchAllCandidates(runId?: string, sourceIds?: string[]) {
 
                 // Save candidates with translated titles
                 for (const candidate of candidates) {
+                    // Check blacklist
+                    const isBlocked = await blacklistService.isBlocked(
+                        candidate.title,
+                        candidate.url,
+                        source.id
+                    );
+                    if (isBlocked) {
+                        console.log(`Blocked by blacklist: ${candidate.title}`);
+                        continue;
+                    }
+
                     let titleCN = '';
                     if (source.type === 'jp') {
                         try {

@@ -65,7 +65,13 @@ export function ArticleCard({ article, isSelected, onToggleSelect, isSelectionMo
 
             {/* Delete button positioned absolutely outside the Link */}
             <div className="absolute top-4 right-4 z-10 transition-opacity duration-200">
-                <ArticleActions articleId={article.id} />
+                <ArticleActions
+                    articleId={article.id}
+                    articleTitle={article.title}
+                    articleUrl={article.url}
+                    sourceId={article.source?.id}
+                    sourceName={article.source?.name}
+                />
             </div>
 
             <div

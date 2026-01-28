@@ -2,6 +2,7 @@
 
 import { SettingsForm } from "@/components/settings/settings-form";
 import { BackupSection } from "@/components/settings/backup-section";
+import { BlacklistManager } from "@/components/settings/blacklist-manager";
 import { SETTING_DEFAULTS, SettingsValues } from "@/lib/constants/settings";
 import { saveSettingsAction } from "./actions";
 
@@ -22,6 +23,7 @@ export function SettingsClient({ initialSettings }: SettingsClientProps) {
                 onSave={handleSave}
             />
             <BackupSection />
+            <BlacklistManager />
         </div>
     );
 }

@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/lib/logger';
 import { processArticle } from '@/lib/services/event-manager';
 import { translationService } from '@/lib/services/translator';
+import { blacklistService } from '@/lib/services/blacklist';
 
 const parser = new Parser();
 
@@ -22,6 +23,7 @@ export async function fetchAllRssSources(runId?: string) {
 
         let totalNew = 0;
         let totalErrors = 0;
+        let totalBlocked = 0;
 
         for (const source of activeSources) {
             try {
@@ -34,6 +36,18 @@ export async function fetchAllRssSources(runId?: string) {
                     // Check duplicate
                     const existing = await db.select().from(articles).where(eq(articles.url, item.link)).limit(1);
                     if (existing.length > 0) continue;
+
+                    // Check blacklist before processing
+                    const isBlocked = await blacklistService.isBlocked(
+                        item.title || '',
+                        item.link,
+                        source.id
+                    );
+                    if (isBlocked) {
+                        console.log(`Blocked by blacklist: ${item.title}`);
+                        totalBlocked++;
+                        continue;
+                    }
 
                     // Extract content
                     let content = item.contentSnippet || item.content || '';

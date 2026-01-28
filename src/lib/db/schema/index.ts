@@ -127,4 +127,13 @@ export const peopleRelations = relations(people, ({ many }) => ({
     articlePeople: many(articlePeople),
 }));
 
+// Blacklist for permanent exclusion
+export const blacklists = sqliteTable('blacklists', {
+    id: text('id').primaryKey(),
+    type: text('type', { enum: ['source', 'title', 'url'] }).notNull(),
+    value: text('value').notNull(), // Source ID, title keyword, or URL pattern
+    description: text('description'), // Optional description for reference
+    createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+});
+
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+
     Table,
     TableBody,
     TableCell,
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EditSourceDialog } from "@/components/sources/edit-source-dialog";
-import { Plus, Trash2, ExternalLink, RefreshCw, Twitter, Globe, Languages, Check, X, Loader2, Pencil } from "lucide-react";
+import { Plus, Trash2, ExternalLink, RefreshCw, Twitter, Globe, Languages, Check, X, Loader2, Pencil, Ban, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -21,6 +22,13 @@ import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { useGlobalModal } from "@/components/providers/global-modal-provider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BlacklistAddDialog } from "@/components/settings/blacklist-add-dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface NewsSource {
     id: string;
@@ -52,6 +60,40 @@ export default function SourcesPage() {
     const [editingSource, setEditingSource] = useState<NewsSource | null>(null);
     const [selectedSourceIds, setSelectedSourceIds] = useState<Set<string>>(new Set());
     const modal = useGlobalModal();
+
+    // Blacklist state
+    const [showBlacklistDialog, setShowBlacklistDialog] = useState(false);
+    const [blacklistType, setBlacklistType] = useState<'source' | 'title' | 'url'>('title');
+    const [blacklistValue, setBlacklistValue] = useState('');
+    const [blacklistDescription, setBlacklistDescription] = useState('');
+    const [targetCandidateId, setTargetCandidateId] = useState<string | null>(null);
+
+    const openBlacklistDialog = (candidate: CandidateArticle, type: 'source' | 'title' | 'url') => {
+        setTargetCandidateId(candidate.id);
+        setBlacklistType(type);
+        switch (type) {
+            case 'source':
+                setBlacklistValue(candidate.sourceId || '');
+                setBlacklistDescription(candidate.sourceName || '');
+                break;
+            case 'title':
+                setBlacklistValue(candidate.title || '');
+                setBlacklistDescription(`屏蔽包含此關鍵字的標題`);
+                break;
+            case 'url':
+                setBlacklistValue(candidate.url || '');
+                setBlacklistDescription(`屏蔽此 URL 模式`);
+                break;
+        }
+        setShowBlacklistDialog(true);
+    };
+
+    const handleBlacklistSuccess = () => {
+        if (targetCandidateId) {
+            handleReject(targetCandidateId);
+        }
+        setTargetCandidateId(null);
+    };
 
     const fetchSources = async () => {
         setLoading(true);
@@ -317,6 +359,27 @@ export default function SourcesPage() {
                                                             <X className="h-4 w-4" />
                                                             剔除
                                                         </Button>
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuItem onClick={() => openBlacklistDialog(article, 'title')}>
+                                                                    <Ban className="h-4 w-4 mr-2" />
+                                                                    永久屏蔽 (按標題)
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => openBlacklistDialog(article, 'url')}>
+                                                                    <Ban className="h-4 w-4 mr-2" />
+                                                                    永久屏蔽 (按 URL)
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => openBlacklistDialog(article, 'source')}>
+                                                                    <Ban className="h-4 w-4 mr-2" />
+                                                                    永久屏蔽 (整個來源)
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
@@ -487,6 +550,15 @@ export default function SourcesPage() {
                 onOpenChange={(open) => !open && setEditingSource(null)}
                 source={editingSource}
                 onSuccess={fetchSources}
+            />
+
+            <BlacklistAddDialog
+                open={showBlacklistDialog}
+                onOpenChange={setShowBlacklistDialog}
+                initialType={blacklistType}
+                initialValue={blacklistValue}
+                initialDescription={blacklistDescription}
+                onSuccess={handleBlacklistSuccess}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
