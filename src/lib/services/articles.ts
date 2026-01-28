@@ -1,7 +1,7 @@
 
 import { db } from '@/lib/db';
 import { articles, articlePeople, sources, events } from '@/lib/db/schema';
-import { eq, desc, and, sql, like, or } from 'drizzle-orm';
+import { eq, desc, and, sql, like, or, inArray } from 'drizzle-orm';
 import { type InferSelectModel } from 'drizzle-orm';
 
 export type Article = typeof articles.$inferSelect;
@@ -142,5 +142,12 @@ export class ArticlesService {
         await db.delete(articlePeople).where(eq(articlePeople.articleId, id));
         // Then delete the article
         await db.delete(articles).where(eq(articles.id, id));
+    }
+    async deleteMany(ids: string[]) {
+        if (ids.length === 0) return;
+        // First delete related records
+        await db.delete(articlePeople).where(inArray(articlePeople.articleId, ids));
+        // Then delete the articles
+        await db.delete(articles).where(inArray(articles.id, ids));
     }
 }

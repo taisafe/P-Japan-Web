@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     Table,
     TableBody,
@@ -49,6 +50,7 @@ export default function SourcesPage() {
     const [isFetching, setIsFetching] = useState(false);
     const [approvingIds, setApprovingIds] = useState<Set<string>>(new Set());
     const [editingSource, setEditingSource] = useState<NewsSource | null>(null);
+    const [selectedSourceIds, setSelectedSourceIds] = useState<Set<string>>(new Set());
     const modal = useGlobalModal();
 
     const fetchSources = async () => {
@@ -70,7 +72,15 @@ export default function SourcesPage() {
         const toastId = toast.loading("正在抓取候選新聞...", { description: "使用瀏覽器模式，這可能需要較長時間" });
 
         try {
-            const res = await fetch("/api/manual-update", { method: "POST" });
+            const body = selectedSourceIds.size > 0
+                ? { sourceIds: Array.from(selectedSourceIds) }
+                : {};
+
+            const res = await fetch("/api/manual-update", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
             const data = await res.json();
 
             if (res.ok) {
@@ -202,7 +212,7 @@ export default function SourcesPage() {
                         className="gap-2"
                     >
                         <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-                        {isFetching ? '抓取中...' : '抓取候選新聞'}
+                        {isFetching ? '抓取中...' : selectedSourceIds.size > 0 ? `抓取選定 (${selectedSourceIds.size})` : '抓取全部候選新聞'}
                     </Button>
                     <Button asChild className="bg-editorial-pink hover:bg-editorial-pink/90 text-white font-medium gap-2">
                         <Link href="/sources/new">
@@ -330,6 +340,18 @@ export default function SourcesPage() {
                             <Table>
                                 <TableHeader className="bg-muted/10">
                                     <TableRow className="hover:bg-transparent">
+                                        <TableHead className="w-[50px] pl-4">
+                                            <Checkbox
+                                                checked={sources.length > 0 && selectedSourceIds.size === sources.length}
+                                                onCheckedChange={(checked: boolean) => {
+                                                    if (checked) {
+                                                        setSelectedSourceIds(new Set(sources.map(s => s.id)));
+                                                    } else {
+                                                        setSelectedSourceIds(new Set());
+                                                    }
+                                                }}
+                                            />
+                                        </TableHead>
                                         <TableHead className="w-[300px] font-bold text-xs py-4 text-muted-foreground">來源名稱</TableHead>
                                         <TableHead className="font-bold text-xs text-muted-foreground">類型</TableHead>
                                         <TableHead className="font-bold text-xs text-muted-foreground">分類標籤</TableHead>
@@ -348,6 +370,19 @@ export default function SourcesPage() {
                                     ) : (
                                         sources.map((source) => (
                                             <TableRow key={source.id} className="group hover:bg-muted/20 transition-colors">
+                                                <TableCell className="pl-4">
+                                                    <Checkbox
+                                                        checked={selectedSourceIds.has(source.id)}
+                                                        onCheckedChange={(checked: boolean) => {
+                                                            setSelectedSourceIds(prev => {
+                                                                const next = new Set(prev);
+                                                                if (checked) next.add(source.id);
+                                                                else next.delete(source.id);
+                                                                return next;
+                                                            });
+                                                        }}
+                                                    />
+                                                </TableCell>
                                                 <TableCell className="py-4">
                                                     <div className="flex flex-col">
                                                         <span className="font-bold text-lg text-foreground">{source.name}</span>
@@ -387,6 +422,38 @@ export default function SourcesPage() {
                                                 </TableCell>
                                                 <TableCell className="text-right">
                                                     <div className="flex justify-end gap-1">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="text-muted-foreground hover:text-primary transition-colors"
+                                                            onClick={async (e) => {
+                                                                e.stopPropagation();
+                                                                const toastId = toast.loading(`正在抓取 ${source.name}...`, { description: "使用瀏覽器模式" });
+                                                                try {
+                                                                    const res = await fetch("/api/manual-update", {
+                                                                        method: "POST",
+                                                                        headers: { "Content-Type": "application/json" },
+                                                                        body: JSON.stringify({ sourceIds: [source.id] })
+                                                                    });
+                                                                    const data = await res.json();
+                                                                    if (res.ok) {
+                                                                        toast.success("抓取完成", {
+                                                                            id: toastId,
+                                                                            description: `新增 ${data.newCandidates || 0} 條候選新聞`
+                                                                        });
+                                                                        fetchSources();
+                                                                        fetchCandidates();
+                                                                    } else {
+                                                                        toast.error("抓取失敗", { id: toastId, description: data.error });
+                                                                    }
+                                                                } catch (error) {
+                                                                    console.error(error);
+                                                                    toast.error("請求錯誤", { id: toastId });
+                                                                }
+                                                            }}
+                                                        >
+                                                            <RefreshCw className="h-4 w-4" />
+                                                        </Button>
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"

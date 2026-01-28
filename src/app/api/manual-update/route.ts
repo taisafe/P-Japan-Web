@@ -10,8 +10,11 @@ export async function POST(request: Request) {
     try {
         await logger.info(`Manual update started. ID: ${updateId}`, source);
 
+        const body = await request.json().catch(() => ({}));
+        const { sourceIds } = body;
+
         // Execute Browser-based Candidate Fetch
-        const result = await fetchAllCandidates(updateId);
+        const result = await fetchAllCandidates(updateId, sourceIds);
 
         await logger.info(`Manual update completed successfully. ID: ${updateId}`, source);
 

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Newspaper, Calendar, Globe } from "lucide-react";
 import { DateTimeline } from "@/components/ui/timeline";
 import { ArticleActions } from "@/components/updates/article-actions";
+import { ArticleList } from "@/components/updates/article-list";
 
 export default async function UpdatesPage({
     searchParams,
@@ -40,78 +41,7 @@ export default async function UpdatesPage({
 
             <DateTimeline availableDates={availableDates} currentDate={date} />
 
-            <div className="grid gap-4">
-                {articles.length === 0 ? (
-                    <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-xl">
-                        目前沒有最新動態。請前往「情報來源」執行抓取。
-                    </div>
-                ) : (
-                    articles.map((article) => (
-                        <div key={article.id} className="relative group">
-                            {/* Delete button positioned absolutely outside the Link */}
-                            <div className="absolute top-4 right-4 z-10">
-                                <ArticleActions articleId={article.id} />
-                            </div>
-
-                            <Link href={`/updates/${article.id}`} className="block">
-                                <Card className="hover:shadow-md transition-all duration-200 border-l-4 border-l-transparent hover:border-l-editorial-pink">
-                                    <CardContent className="p-6 pr-14">
-                                        <div className="flex flex-col md:flex-row gap-4 justify-between">
-                                            <div className="space-y-3 flex-1">
-                                                <div className="space-y-1">
-                                                    <h3 className="text-xl font-bold group-hover:text-editorial-pink transition-colors line-clamp-2 leading-tight">
-                                                        {article.titleCN || article.title}
-                                                    </h3>
-                                                    {article.titleCN && (
-                                                        <p className="text-sm text-muted-foreground font-medium line-clamp-1 opacity-80 group-hover:opacity-100">
-                                                            {article.title}
-                                                        </p>
-                                                    )}
-                                                </div>
-
-                                                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                                                    <Badge variant="secondary" className="font-normal bg-muted text-muted-foreground hover:bg-muted">
-                                                        {article.source?.name || "Unknown Source"}
-                                                    </Badge>
-                                                    <span className="flex items-center gap-1">
-                                                        <Calendar className="h-3.5 w-3.5" />
-                                                        {article.publishedAt ? format(article.publishedAt, "PPP p", { locale: zhTW }) : "未知時間"}
-                                                    </span>
-                                                    {article.source?.weight !== undefined && (
-                                                        <Badge variant="outline" className="font-mono text-xs text-muted-foreground">
-                                                            W:{article.source.weight}
-                                                        </Badge>
-                                                    )}
-                                                </div>
-
-                                                {(() => {
-                                                    const tags = article.tags;
-                                                    if (!tags || !Array.isArray(tags) || tags.length === 0) return null;
-                                                    return (
-                                                        <div className="flex flex-wrap gap-2 pt-1">
-                                                            {(tags as string[]).map((tag) => (
-                                                                <Badge key={tag} variant="outline" className="text-xs text-editorial-pink border-editorial-pink/30">
-                                                                    #{tag}
-                                                                </Badge>
-                                                            ))}
-                                                        </div>
-                                                    );
-                                                })()}
-                                            </div>
-
-                                            {article.source?.type === 'twitter' && (
-                                                <div className="hidden md:flex items-center justify-center w-16 text-sky-500">
-                                                    {/* Could use Twitter icon */}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </Link>
-                        </div>
-                    ))
-                )}
-            </div>
+            <ArticleList articles={articles} />
 
             {/* Simple Pagination */}
             {totalPages > 1 && (

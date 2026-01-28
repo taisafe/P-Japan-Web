@@ -398,3 +398,33 @@ async delete(id: string) {
 *   ✅ **導航阻斷**：點擊刪除按鈕不再誤觸發文章跳轉。
 *   ✅ **對話框功能**：刪除確認視窗正常彈出。
 *   ✅ **數據完整性**：文章及其關聯數據能被成功物理刪除，且不會引發資料庫錯誤。
+
+---
+
+# 來源選擇與手動抓取功能開發除錯紀錄 (Debug Log)
+
+## 1. 來源選擇功能 (Source Selection)
+
+### 1.1 需求描述
+原本的「抓取候選新聞」按鈕只能一次抓取「所有」來源，耗時且缺乏彈性。用戶希望能選擇特定來源進行單獨或批量抓取。
+
+### 1.2 實作過程與挑戰
+*   **前端狀態管理**：在 `page.tsx` 中引入 `selectedSourceIds` (Set) 來追蹤勾選狀態。
+*   **API 調整**：修改 `/api/manual-update` 與 `browser.ts`，使其接收可選的 `sourceIds` 參數。若該參數存在，則只過濾並抓取指定的來源 ID。
+
+### 1.3 缺失組件補充
+*   **問題**：嘗試使用 `<Checkbox />` 組件時，發現專案中尚未安裝與建立該 UI 組件。
+*   **解決**：
+    1.  安裝依賴：`npm install @radix-ui/react-checkbox`
+    2.  建立組件：創建 `src/components/ui/checkbox.tsx`，封裝 Radix UI 的 Checkbox Primitive。
+    3.  修復型別：在使用 `onCheckedChange` 時，遇到 TypeScript 隱式 Any 錯誤，顯式標註 `(checked: boolean)` 解決。
+
+## 2. 讀賣新聞排名頁面調研 (Yomiuri Ranking Research)
+
+### 2.1 調研目標
+確認 `https://www.yomiuri.co.jp/ranking/` 是否提供專門針對「政治」類別的 24 小時熱門排名。
+
+### 2.2 調研結果
+*   **綜合排名**：該 URL 是全站綜合閱讀排名（Access Ranking），包含社會、娛樂、體育等所有類別，並非政治專屬。
+*   **混合訊號**：雖然政治新聞會出現在榜單中，但與其他雜訊混雜，不適合直接作為純政治新聞來源。
+*   **結論**：若需要純政治新聞，應鎖定 `https://www.yomiuri.co.jp/politics/`，但該頁面主要為時間軸排序而非熱度排序。

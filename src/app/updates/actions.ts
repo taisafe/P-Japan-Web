@@ -64,3 +64,8 @@ export async function deleteArticle(articleId: string) {
     await articlesService.delete(articleId);
     revalidatePath("/updates");
 }
+
+export async function bulkDeleteArticles(articleIds: string[]) {
+    await articlesService.deleteMany(articleIds);
+    revalidatePath("/updates");
+}

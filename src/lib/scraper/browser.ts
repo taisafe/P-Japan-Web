@@ -176,7 +176,7 @@ async function fetchCandidatesFromSource(
 /**
  * Fetch candidates from all active sources and save as 'candidate' status.
  */
-export async function fetchAllCandidates(runId?: string) {
+export async function fetchAllCandidates(runId?: string, sourceIds?: string[]) {
     await logger.info('Starting Fetch Run', 'BROWSER_SCRAPER', { runId });
 
     let browser: Browser | null = null;
@@ -184,9 +184,19 @@ export async function fetchAllCandidates(runId?: string) {
     let totalErrors = 0;
 
     try {
-        const activeSources = await db.select().from(sources).where(
+        let query = db.select().from(sources).where(
             and(eq(sources.isActive, true), ne(sources.type, 'twitter'))
         );
+
+        if (sourceIds && sourceIds.length > 0) {
+            // @ts-ignore - inOperator is correct but type def might be strict
+            // We'll filter in JS if needed or build query differently
+        }
+
+        const allActiveSources = await query;
+        const activeSources = sourceIds && sourceIds.length > 0
+            ? allActiveSources.filter(s => sourceIds.includes(s.id))
+            : allActiveSources;
 
         // Pre-check if we need browser
         const needsBrowser = activeSources.some(s => !isRssFeedUrl(s.url));
