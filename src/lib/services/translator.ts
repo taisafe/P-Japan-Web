@@ -42,11 +42,12 @@ export class TranslationService {
             const { client, model } = await getAIClient('translation');
 
             // 4. Construct Prompt
-            const systemPrompt = `你是一個專業的日本政治新聞翻譯專家。
-請將提供的日文新聞內容翻譯成簡體中文 (Simplified Chinese)。
+            // 4. Construct Prompt
+            const systemPrompt = `你是一個專業的新聞翻譯專家 (英/日 -> 繁體中文)。
+請將提供的新聞內容 (英文或日文) 翻譯成台灣慣用的繁體中文 (Traditional Chinese, Taiwan usage)。
 重點要求：
 1. 保持新聞的客觀語氣。
-2. 準確翻譯日本政治專有名詞 (例如：自民党 -> 自民党, 衆議院 -> 众议院)。
+2. 準確翻譯政治專有名詞 (例如：自民党 -> 自民黨, Diet -> 國會)。
 3. 輸出格式必須是 Markdown，保留原本的段落結構。
 4. 這是標題：${article.title || '無標題'}
 請直接輸出翻譯後的內容，不要包含任何開場白或結語。`;
@@ -128,7 +129,7 @@ export class TranslationService {
 
             const completionPromise = client.chat.completions.create({
                 messages: [
-                    { role: 'system', content: 'You are a professional translator. Translate this Japanese news title to Simplified Chinese. Output ONLY the translated title.' },
+                    { role: 'system', content: 'You are a professional news translator. Translate this news title (from English or Japanese) to Traditional Chinese (Taiwan usage). Output ONLY the translated title.' },
                     { role: 'user', content: title }
                 ],
                 model: model,

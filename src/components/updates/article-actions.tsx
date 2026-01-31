@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { Trash2, Ban, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -78,6 +78,26 @@ export function ArticleActions({
         setShowBlacklistDialog(true);
     };
 
+
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) {
+        return (
+            <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground transition-colors"
+                disabled
+            >
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">更多操作</span>
+            </Button>
+        );
+    }
 
     return (
         <>

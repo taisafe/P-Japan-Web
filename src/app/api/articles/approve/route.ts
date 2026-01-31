@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
         // 4. Translate content (if Japanese source)
         const source = article.source;
-        if (source?.type === 'jp' && fullContent?.content) {
+        if (fullContent?.content) {
             try {
                 await translationService.translateArticle(articleId);
             } catch (e: any) {
